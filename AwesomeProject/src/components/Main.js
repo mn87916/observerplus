@@ -125,7 +125,7 @@ export default class App extends React.Component {
           
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.goodworkbutton} onPress={()=>{alert("you clicked goodwork")}}>
+        <TouchableOpacity style={styles.goodworkbutton} onPress={()=>{ this.props.navigation.navigate("GoodWork");}}>
           <Image style={styles.buttonimage}
           source={require("../images/goodwork.png")}/>
           

@@ -36,16 +36,16 @@ export default class App extends React.Component {
   }
   render() {  
     return (
-    <ImageBackground source={require('../../images/announcement_background.png')} style = {styles.background}>
-     <Text style ={(styles.toptext)}>排名</Text>
+    <ImageBackground source={require('../../images/Rank_Background.png')} style = {styles.background}>
      <View style ={styles.upperspace}>
         <TouchableOpacity style={styles.backbutton} onPress={()=>{ this.props.navigation.goBack();}}>
           <Image style={styles.back}
           source={require("../../images/retune.png")}/>
-          
         </TouchableOpacity>
         </View>
-    <View style = {styles.card}>
+        <View style = {styles.MyCard}>
+        </View>
+    <View style = {styles.AnnounceCard}>
     <FlatList data = {this.state.rank} 
         keyExtractor={(item, key) =>key.toString()}
         renderItem = {({item})=>{
@@ -73,18 +73,17 @@ const styles = StyleSheet.create({
     resizeMode:'contain',
     justifyContent:'center',
   },
-    card:{
-    //top:'15%',
+    AnnounceCard:{  
+    height:"75%",
+    width:"100%",
+    top:'5%',
     fontFamily:'nunito-bold',
     //marginVertical:'5%',
     color:'#333',
     justifyContent: 'center',
-    //marginBottom:'2.5%',
-
-        //position:'absolute',
-        //padding:0,
-        
-      },
+    //marginBottom:'10%',
+    //backgroundColor:'#d9cfc5',
+  },
       card2:{
         height:"100%",
         width:"90%",
@@ -97,12 +96,12 @@ const styles = StyleSheet.create({
         //padding:0,
       },
       upperspace:{
-        width: '90%', 
-        height: '6%',
+        width: '70%', 
+        height: '7.5%',
         //marginBottom:'5%',
         position:'absolute',
         top:'3%',
-        left:'6%',
+        left:'3%',
         },
   welcome: {  
     fontSize: 20,  

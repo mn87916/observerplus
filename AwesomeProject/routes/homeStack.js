@@ -22,6 +22,7 @@ import MeasureRecord from '../src/components/Measure/MeasureRecord';
 import MeasurePhotoConfirm from '../src/components/Measure/MeasurePhotoConfirm';
 import Gallery from '../src/components/Gallery/Gallery';
 import Data_record from '../src/components/Gallery/Data_record';
+import GW_date from '../src/components/GoodWork/GW_date';
 const components = {
         SignIn: {
         screen: SignIn,
@@ -212,6 +213,14 @@ const components = {
         navigationOptions:{
             header: null,
             title:'Data_record',
+            
+        }
+    },
+    GW_date: {
+        screen: GW_date,
+        navigationOptions:{
+            header: null,
+            title:'GW_date',
             
         }
     },
