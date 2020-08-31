@@ -37,6 +37,7 @@ export default class App extends React.Component {
       for (var i = 0 ; i < responseData.length;i++) {
        this.state.Gallery.push(responseData[i])   
       }
+      console.log(this.state.Gallery)
       /*for (var i = 0 ; i < this.state.Gallery[i].Img.length;i++) {
        this.state.img.push(this.state.Gallery.Img[])       
       }*/
@@ -49,6 +50,14 @@ export default class App extends React.Component {
     .done();
   }
 
+
+  /*handleVideoRef = async (component) => {
+      if (component && !this.playbackObject) {
+        this.playbackObject = component;
+        await this.playbackObject.loadAsync(Asset.fromModule(source={ uri:item.Media1}));
+        await this.playbackObject.playAsync();
+      }
+    }*/
 
     ImgorVideo = (item) => { 
       console.log(item.Type1)
@@ -65,7 +74,7 @@ export default class App extends React.Component {
         return(
           <View style ={(Gallery.CardBox2)}>
           <Video
-              source={{ uri:'http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4'}}
+              source={{ uri:item.Media1}}
                             rate={1.0}
                             volume={1.0}
                             isMuted={false}
@@ -96,13 +105,13 @@ export default class App extends React.Component {
           <View style ={(Gallery.CardBox3)}>
           
           <Video
-              source={{uri:'http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4'}}
+              source={{uri:item.Media2}}
                             rate={1.0}
                             volume={1.0}
                             isMuted={false}
-                            resizeMode="cover"
-                            shouldPlay
-                            isLooping
+                            resizeMode="stretch"
+                            shouldPlay ={false}
+                            isLooping ={false}
                             useNativeControls
               style={ {width:'100%' , height:'100%'}}
             />
@@ -136,13 +145,10 @@ export default class App extends React.Component {
           return (
         
     <ImageBackground source={require('../../images/Gallery_background.png')} style = {Gallery.container}>
-     <View style ={Gallery.upperspace}>
         <TouchableOpacity style={Gallery.backbutton} onPress={()=>{ this.props.navigation.goBack();}}>
           <Image style={Gallery.back}
-          source={require("../../images/retune.png")}/>
-          
+          source={require("../../images/retune.png")}/> 
         </TouchableOpacity>
-        </View>
     
      <View style ={(Gallery.container1)}>
       <FlatList data = {this.state.Gallery} 

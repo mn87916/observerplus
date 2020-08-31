@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { StyleSheet, ImageBackground,Text, View ,TextInput, TouchableOpacity,Alert,Navigator} from 'react-native';
+import { StyleSheet, ImageBackground,Text, View ,TextInput, TouchableOpacity,Alert,Navigator,ActivityIndicator} from 'react-native';
 import { getCurrentFrame } from 'expo/build/AR';
 import '../data/GlobalVariable.js';
 
@@ -11,12 +11,16 @@ export default class Form extends Component{
 
         this.state = {user_txt: '',pass_txt: ''};
         this.state = {somedata: ''};
+        this.state = {
+          isLoading:false,
+        }
         
         }
     onButtonPress ()  
     {
-
-        Alert.alert('測試','帳號為：'+this.state.user_text+'，密碼為：'+this.state.pass_text)
+        this.state.isLoading = true;
+        this.forceUpdate()
+        //Alert.alert('測試','帳號為：'+this.state.user_text+'，密碼為：'+this.state.pass_text)
 
 
         var queryURL = 'https://observerplus.club/API/login.aspx';
@@ -51,7 +55,9 @@ export default class Form extends Component{
         }
         else
         {
-          Alert.alert('帳號或密碼錯誤')
+          Alert.alert('錯誤!','帳號或密碼錯誤!')
+          this.state.isLoading = false;
+         this.forceUpdate()
         }
       } 
     })
@@ -63,7 +69,25 @@ export default class Form extends Component{
 
 
     render(){
+      if(this.state.isLoading){
+        return(
+            <ImageBackground source = {require('../images/login_background.png')} style = {styles.image}>   
+                <View style = {styles.container}>
+
+                <ActivityIndicator size = {80} color="#4d805e"/>
+
+                <Text style={styles.logintext}>
+                        登入中...
+                    </Text>
+                   
+                    </View>
+
+               </ImageBackground>
+        )
+      }
+      else{
         return(      
+          
           <ImageBackground source = {require('../images/login_background.png')} style = {styles.image}>   
                 <View style = {styles.container}>
                   
@@ -71,29 +95,44 @@ export default class Form extends Component{
                         <View style={styles.header}>
                         
                     <Text style={styles.title}>
-                        歡迎進入小小觀察+</Text>
+                        登入</Text>
                         </View>
                     
+                    <Text style={styles.accpasstext}>
+                        帳號 :</Text>
+                    
+                    <View style = {styles.centerview}>
 
                     <TextInput style = {styles.inputBox} underlineColorAndroid= 'rgba(0,0,0,0)' 
-                     placeholder = "帳號"
-                     placeholderTextColor = "#ADADAD"
+                    
                      onChangeText={(user_text) => this.setState({user_text})} //寫入state
                      
                     />
+                    </View>
+
+                    <Text style={styles.accpasstext}>
+                        密碼 :
+                    </Text>
+
+                    <View style = {styles.centerview}>
+
                     <TextInput style = {styles.inputBox} underlineColorAndroid= 'rgba(0,0,0,0)' 
-                     placeholder = "密碼"
+                    
                      secureTextEntry={true}
-                     placeholderTextColor = "#ADADAD"
+                     
                      onChangeText={(pass_text) => this.setState({pass_text})}
                     />
 
+                    </View>
+
+                    <View style = {styles.centerview}>
+
                     <TouchableOpacity style = {styles.button}
                     onPress={this.onButtonPress.bind(this)}>
-                    
-                        
                         <Text style ={styles.buttonText}>登入</Text>
                         </TouchableOpacity>
+
+                  </View>
 
                     </View>
 
@@ -101,9 +140,12 @@ export default class Form extends Component{
 
                 </View>
                </ImageBackground>
+              
 
                
         )
+      }
+        
     }
 }
 
@@ -112,24 +154,29 @@ export default class Form extends Component{
 
 const styles = StyleSheet.create({  
     container: {  
+      
       flex:1,
       alignItems:'center',
       justifyContent:'center',
     }  ,
-
+    
     inputBox:{
-        width:'100%',
+        width:'90%',
         backgroundColor:'#FFFFFF',
-        borderRadius: 25,
+        //borderRadius: 25,
+        borderWidth:1,
         paddingHorizontal:20,
         fontSize:25,
         marginVertical: 10,
+        
     },
 
     button:{
+        top:'20%',
         width:150,
         backgroundColor:'#faa45b',
-        borderRadius:25,
+        borderRadius:10,
+        borderWidth:1,
         marginVertical:10,
         paddingVertical : 4,
     },
@@ -142,13 +189,15 @@ const styles = StyleSheet.create({
     },
 
     card:{
+      
+       top:'15%',
         height:280,
         width:"80%",
         backgroundColor:"#FBFADF",
         borderRadius:10,
+        borderWidth:1,
         elevation:10,
-        alignItems:'center',
-        padding:15,
+        //alignItems:'center',
       },
 
 
@@ -159,18 +208,20 @@ const styles = StyleSheet.create({
         marginRight:10,
       },
       header: {
+        
         flexDirection:"row",
       },
 
       title:{
-        fontWeight:"bold",
+        textAlign: 'center',
         fontSize:25,
-        backgroundColor:'#4d805e',
+        backgroundColor:'#5d9b84',
         width:"100%",
-        padding:12,
-        borderRadius:10,
-        marginVertical: 4,
-        
+        padding:8,
+        borderTopLeftRadius:10,
+        borderTopRightRadius:10,
+        //marginVertical: 4,
+        color: 'white',
       },
       image: {
         width:'100%',
@@ -178,5 +229,16 @@ const styles = StyleSheet.create({
         flex: 1,
         justifyContent: "center",
       },
+      accpasstext:{
+        left:'5%',
+        fontSize:25,
+      },
+      centerview:{
+        justifyContent:'center',
+        alignItems:'center',
+      },
+      logintext:{
+        fontSize:25,
+      }
 
   });  

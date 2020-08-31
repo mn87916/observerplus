@@ -11,7 +11,7 @@
     "splash": {
       "image": "./assets/splash.png",
       "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
+      "backgroundColor": "#b4d3aa"
     },
     "updates": {
       "fallbackToCacheTimeout": 0
@@ -24,7 +24,11 @@
     },
     "android": {
       "package": "com.kao.observerplus",
-      "versionCode": 1
+      "versionCode": 1,
+      "adaptiveIcon":{
+        "backgroundColor": "#FBFADF",
+        "foregroundImage": "./assets/icon.png"
+      }
     }
   }
 }

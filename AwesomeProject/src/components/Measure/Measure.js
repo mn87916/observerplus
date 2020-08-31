@@ -1,5 +1,5 @@
 import React, {Component} from 'react';  
-import {Platform, StyleSheet,Dimensions, Text, View,TouchableOpacity,Image,TextInput,ImageBackground,KeyboardAvoidingView,SafeAreaView,ScrollView} from 'react-native';
+import {Platform, StyleSheet,Dimensions,ActivityIndicator,FlatList, Text, View,TouchableOpacity,Image,TextInput,ImageBackground,KeyboardAvoidingView,SafeAreaView,ScrollView} from 'react-native';
 import '../../data/GlobalVariable.js';
 import * as ImagePicker from 'expo-image-picker';
 import Constants from 'expo-constants';
@@ -10,20 +10,26 @@ import { Header } from 'react-navigation-stack';
 export default class App extends React.Component {
   constructor(props) 
         {
-        super(props);
-
-        this.state = {plant_height: '',
-        width : Dimensions.get('window').width,
-        height : Dimensions.get('window').height,
-        };     
+          super(props);
+          this.state = {plant_height: '',
+          width : Dimensions.get('window').width,
+          height : Dimensions.get('window').height,
+          isLoading:true,
+          image1:'',
+          image2:'',
+          image3:'',
+          img:[],
+          task1:"",
+          } 
         }
-  state = {
-    image: null,
-  };
-  
+
 
    componentDidMount() {
     this.getPermissionAsync();
+      global.a = [];
+      global.b = 0;
+      global.c = -1;
+      this.setState({isLoading:false})
   }
 
   getPermissionAsync = async () => {
@@ -35,6 +41,35 @@ export default class App extends React.Component {
     }
   };
 
+  uploadImageAsync = (api)  =>{
+    let apiUrl = 'https://observerplus.club/API/Img.aspx';
+      var data = new FormData();  
+      data.append("file",{  
+        uri:api,
+        name:"file",
+        type:"image/jpg",
+        
+      })
+      fetch(apiUrl, {  
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'multipart/form-data'
+        },
+        method: 'POST',
+        body: data
+      }).then(response => response.text())
+      .then(response => {
+          console.log('succ ')
+          //console.log(response)
+          this.props.navigation.navigate("Measure");
+        }
+        ).catch(err => {
+        console.log('err ')
+        console.log(err)
+      } )
+      .done(); 
+    }
+
   _pickImage = async () => {
     try {
       let result = await ImagePicker.launchCameraAsync({
@@ -44,14 +79,69 @@ export default class App extends React.Component {
         quality: 1,
       });
       if (!result.cancelled) {
-        this.setState({ image: result.uri });
+        b++;
+        c++;
+          //console.log(item);
+          a[c] ={id:c,image:result.uri};
+          
+          //console.log(this.state.image);
+          this.state.img.push(a[c]);
+          //console.log(this.state.img)
+          console.log(this.state.task1)
+          console.log(b)
+          if(b == 1)
+          {
+            this.setState({ image1:result.uri});
+            //this.setState({ task1:1});
+            this.imagephoto1();
+          }
+          else if(b == 2)
+          {
+            this.setState({ image2:result.uri});
+            this.setState({ task1:1});
+            this.imagephoto2();
+          }
+          else if(b == 3)
+          {
+            this.setState({ image3:result.uri});
+            this.setState({ task1:2});
+            this.imagephoto3();
+          }
+          //a[c] =result.uri;
+          //console.log(a[c]);
+          
+          //console.log(this.state.img);
+          
+          //const numbers = [a];
+          //console.log(numbers);
+          //Object d =new Object {"image":'"+'result.uri+'"',}
+          //this.state.image2.push(result[c])
+        
+
+        
+        
+        //const idList = Object.keys(a);
+        //console.log(idList);
+        //this.setState({ image:result.uri});
+        
+        //console.log(this.state.image);
+         //console.log(result);
+        //a += this.state.image+',';
+        
+     //return global.a.map((img) => {  
+        
+      //)
+    // })
         //this.uploadImageAsync(result.uri)
         //global.GlobalVariable.tempphotouri = result.uri ;
-        this.props.navigation.navigate("MeasurePhotoConfirm");
+        //this.props.navigation.navigate("MeasurePhotoConfirm");
 
       }
 
-      console.log('result');
+      //console.log(this.state.image2);
+      
+      //console.log(b);
+      //console.log(this.state.image2);
       
       
     } catch (E) {
@@ -59,7 +149,76 @@ export default class App extends React.Component {
     }
   };
 
-   /*uploadImageAsync = (rest)  =>{
+
+     
+    //if(global.b != 0)
+    //{   
+      
+        //console.log(this.state.img);
+      /*console.log(global.b+"123")
+      console.log(item)
+      for (var i = 0 ; i < global.b;i++) {
+      this.state.image2.push(item[i])
+      console.log(this.state.image2[0])
+      }*///晚上先把轉圈圈的載入用132好在來測試
+      imagephoto1 = () => {
+        if(b >= 1)
+          {
+      //console.log(this.state.image1)
+      //console.log(this.state.task1)
+      return(
+          <View style ={styles.cameraview1}>
+          <Image style = {styles.camera_image}
+                source={{uri:this.state.image1}}/>  
+        </View>
+          )
+          }
+    }
+    imagephoto2 = () => {
+      if(b >= 2)
+          {
+      console.log(this.state.image1)
+      console.log(this.state.image2)
+      //console.log(this.state.task1)
+      return(
+          <View style ={styles.cameraview2}>
+          <Image style = {styles.camera_image}
+                source={{uri:this.state.image2}}/>  
+        </View>
+          )
+        }
+    }
+        imagephoto3 = () => {
+          if(b == 3)
+          {
+      //console.log(this.state.image3)
+      //console.log(this.state.task1)
+      return(
+          <View style ={styles.cameraview3}>
+          <Image style = {styles.camera_image}
+                source={{uri:this.state.image3}}/>  
+        </View>
+          )
+          }
+      }
+  
+    /*<View style = {styles.cameraview1}>
+              <FlatList 
+              data = {this.state.img} 
+              keyExtractor={(item, key) =>key.toString()}
+              renderItem = {({item})=>{
+              return(
+              <View style ={styles.cameraview1}>  
+              <Text>123</Text>
+              <Image style = {styles.camera_image}
+                source={{uri:item.image}}/>              
+              </View>       
+                )}
+              }
+                
+              />
+              </View> 
+   uploadImageAsync = (rest)  =>{
     let apiUrl = 'https://observerplus.club/API/upImg.aspx';
       let data = new FormData();  
       data.append("file",{  
@@ -109,15 +268,19 @@ export default class App extends React.Component {
       console.log(E);
     }
   };
-
+//source={uri?{uri: uri }:null}/>
   render() { 
     let { image } = this.state;
+      if(this.state.isLoading){
+        return(
+          <View style ={styles.background}>
+          <ActivityIndicator size="large" color="#0000ff"/>
+          </View>
+        )
+      }
+  else{
     return (
-     
-     
-    
-
-    <ImageBackground source={require('../../images/Re_background.png')} style = {Globalstyles.Background}>
+    <ImageBackground source={require('../../images/Re_background.png')} style = {styles.background}>
    
      <View style ={styles.upperspace}>
         <TouchableOpacity style={styles.backbutton} onPress={()=>{ this.props.navigation.goBack();}}>
@@ -138,16 +301,15 @@ export default class App extends React.Component {
                      onChangeText={(user_text) => this.setState({user_text})} //寫入state           
                     />
         </View>
-        <View style ={styles.cameraview1}>
-        <Image style = {styles.camera_image}
-          source={{uri:this.state.image}}/>
         </View>
-        <View style ={styles.cameraview2}>
+        <View style ={styles.center2}>
+        <ScrollView>
+        {this.imagephoto1()}
+        {this.imagephoto2()}
+        {this.imagephoto3()}
+        </ScrollView>
         </View>
-        <View style ={styles.cameraview3}>
-        </View>
-        </View>
-        <TouchableOpacity style = {styles.sendbutton}  onPress={()=>{ this.props.navigation.navigate("MeasureRecord");}}>
+        <TouchableOpacity style = {styles.sendbutton}  onPress={()=>alert('尚未成功')}>
         <Text style = {styles.SB_text}>發布</Text>
      </TouchableOpacity>
       <TextInput style = {styles.inputBox} underlineColorAndroid= 'rgba(0,0,0,0)' 
@@ -185,19 +347,21 @@ export default class App extends React.Component {
         <Image style={styles.gallery}
           source={require("../../images/Re_image.png")}/>
      </TouchableOpacity>  
-    </ImageBackground>
-     
-    
-    
-    );  
-  }  
+    </ImageBackground> 
+      );  
+    }  
+  }
 } 
 
 const styles = StyleSheet.create({  
   background: {
-    flex:1,
-    alignItems:'center',
+    resizeMode:'contain',
     justifyContent:'center',
+    flex:1,
+  },
+  background2: {
+    resizeMode:'contain',
+    flex:1,
   },
       container: {
       top:"30%",
@@ -234,7 +398,18 @@ const styles = StyleSheet.create({
         width: '92.5%', 
         height: '55.5%',
         //backgroundColor:'#82ab8f',
-        top:'-11.1%',
+        top:'5%',
+        //marginVertical:"10%",
+        left:"4%",
+        borderRadius:15,
+        //marginBottom:'5%',
+        //position: 'absolute',
+        },
+        center2:{
+        width: '92.5%', 
+        height: '30%',
+        //backgroundColor:'#82ab8f',
+        top:'-30%',
         //marginVertical:"10%",
         left:"4%",
         borderRadius:15,
@@ -285,34 +460,34 @@ const styles = StyleSheet.create({
         //borderWidth: 1,
         },
         cameraview1:{
-        width: '45%', 
-        height: '35%',
-        backgroundColor:'green',
-        top:'52%',
-        //marginVertical:"10%",
-        left:"4%",
+        width: '60%', 
+        height: 170,
+        backgroundColor:'#000000',
+        //top:'10%',
+        marginVertical:"2.5%",
+        left:"20%",
         //marginBottom:'5%',
-        position: 'absolute',
+        //position: 'absolute',
         },
         cameraview2:{
-        width: '45%', 
-        height: '17%',
-        backgroundColor:'yellow',
-        top:'52%',
-        //marginVertical:"10%",
-        left:"51%",
+        width: '60%', 
+        height: 170,
+        backgroundColor:'#000000',
+        //top:'10%',
+        marginVertical:"2.5%",
+        left:"20%",
         //marginBottom:'5%',
-        position: 'absolute',
+        //position: 'absolute',
         },
         cameraview3:{
-        width: '45%', 
-        height: '17%',
-        backgroundColor:'pink',
-        top:'70%',
-        //marginVertical:"10%",
-        left:"51%",
+        width: '60%', 
+        height: 170,
+        backgroundColor:'#000000',
+        //top:'10%',
+        marginVertical:"2.5%",
+        left:"20%",
         //marginBottom:'5%',
-        position: 'absolute',
+        //position: 'absolute',
         },
         sendbutton:{
         top:'62.5%',
@@ -433,6 +608,7 @@ const styles = StyleSheet.create({
     camera_image:{
       width: "100%", 
       height: "100%",
+      resizeMode:'stretch',
     },
     buttonText:{
         fontSize:25,

@@ -6,7 +6,8 @@ export default class App extends React.Component {
   constructor() {
     super();
     this.state = {
-      rank:"",
+      myrank:"",
+      rank:[],
       levelscore: 0,
       levelstep: 0,
     }
@@ -25,8 +26,12 @@ export default class App extends React.Component {
     .then((responseData) => { 
       if (responseData) {
         // 接到 Data      
-        this.setState({rank:responseData})
+        for (var i = 0 ; i < responseData.length;i++) {
+        this.state.rank.push(responseData[i])  
+        }
+        this.setState({myrank:responseData[0]})
         console.log(this.state.rank);
+        console.log(responseData[0]);
       } 
     })
     .catch((error) => {
@@ -45,16 +50,23 @@ export default class App extends React.Component {
         </View>
         <View style = {styles.MyCard}>
         </View>
-    <View style = {styles.AnnounceCard}>
+        <View style ={(styles.MyReallyCard)}> 
+        <Text style ={(styles.Ranknumber)}>{this.state.myrank.rank}</Text>
+            <Text style ={(styles.Rankname)}>{this.state.myrank.name}</Text>
+            <Text style ={(styles.Ranklevel)}>{"等級:"+this.state.myrank.level}</Text>   
+            <Text style ={(styles.RankScore)}>{this.state.myrank.score+"分"}</Text>  
+        </View>   
+    <View style = {styles.RankCard}>
     <FlatList data = {this.state.rank} 
         keyExtractor={(item, key) =>key.toString()}
         renderItem = {({item})=>{
         return(
         <ScrollView>   
         <View style ={(styles.ReallyCard)}>    
-            <Text style ={(styles.AnnounContent)}>{item.rank+'.'}{item.name}</Text>
-            <Text style ={(styles.AnnounTitle)}>{"等級:"+item.level}</Text>   
-            <Text style ={(styles.AnnounDate)}>{item.score+"分"}</Text>  
+            <Text style ={(styles.Ranknumber)}>{item.rank}</Text>
+            <Text style ={(styles.Rankname)}>{item.name}</Text>
+            <Text style ={(styles.Ranklevel)}>{"等級:"+item.level}</Text>   
+            <Text style ={(styles.RankScore)}>{item.score+"分"}</Text>  
           </View>       
         </ScrollView>
         );
@@ -73,10 +85,10 @@ const styles = StyleSheet.create({
     resizeMode:'contain',
     justifyContent:'center',
   },
-    AnnounceCard:{  
-    height:"75%",
+    RankCard:{  
+    height:"65%",
     width:"100%",
-    top:'5%',
+    top:'15%',
     fontFamily:'nunito-bold',
     //marginVertical:'5%',
     color:'#333',
@@ -142,7 +154,7 @@ const styles = StyleSheet.create({
 },
   ReallyCard:{  
     fontFamily:'nunito-bold',
-    borderRadius:30,
+    borderRadius:10,
     marginVertical:"2.5%",
     textAlign: 'center',
     color:'#333',
@@ -150,11 +162,13 @@ const styles = StyleSheet.create({
     shadowRadius:2,
     shadowOpacity:6,
     elevation:3,
-    backgroundColor:'#d9cfc5',
-    justifyContent: 'center',
-    marginHorizontal:"10%",
-    height:100,
-    width:"80%",
+    backgroundColor:'#e5f08a',
+    //justifyContent: 'center',
+    marginHorizontal:"12.5%",
+    height:70,
+    width:"75%",
+    
+    
         /*marginHorizontal:"10%",
         backgroundColor:"#d9cfc5",
         borderRadius:10,
@@ -163,37 +177,64 @@ const styles = StyleSheet.create({
         //alignItems:'center',
         //padding:15,*/
   },  
-AnnounTitle:{  
+  MyReallyCard:{  
+    fontFamily:'nunito-bold',
+    borderRadius:10,
+    marginVertical:"2.5%",
+    textAlign: 'center',
+    color:'#333',
+    shadowOffset:{width:1,height:1},
+    shadowRadius:2,
+    shadowOpacity:6,
+    elevation:3,
+    backgroundColor:'#ffb3b3',
+    //justifyContent: 'center',
+    marginHorizontal:"12.5%",
+    height:70,
+    width:"75%",
+    position:'absolute',
+    top:'15%',
+  },  
+  Ranklevel:{  
     fontFamily:'nunito-bold',
     fontSize: 25,
-    marginVertical:'15%',
+    //marginVertical:'-10%',
     justifyContent: 'center',
     marginHorizontal:'5%',
     position:'absolute',
-    top:'1%',
+    top:'35%',
     left:'50%',
 
   },  
-  AnnounDate:{
+  RankScore:{
     fontFamily:'nunito-bold',
-    fontSize: 28,
-    marginVertical:'15%',
+    fontSize: 25,
+    //marginVertical:'15%',
     justifyContent: 'center',
     marginHorizontal:'5%',
     position:'absolute',
-    //left:'35%',
-    top:'1%',
+    left:'70%',
+    //top:'1%',
 
   },
-  AnnounContent:{
+  Ranknumber:{
     fontFamily:'nunito-bold',
-    fontSize: 30,
-    marginVertical:'10%',
+    fontSize: 25,
+    //marginVertical:'10%',
     justifyContent: 'center',
     marginHorizontal:'5%',
     position:'absolute',
     //top:'1%',
-
+  },
+  Rankname:{
+    fontFamily:'nunito-bold',
+    fontSize: 25,
+    //marginVertical:'10%',
+    justifyContent: 'center',
+    marginHorizontal:'5%',
+    position:'absolute',
+    left:"15%"
+    //top:'1%',
   },
   toptext:{
     fontSize: 30,

@@ -106,11 +106,10 @@ return response.json()
     
     return this.state.img.map((img) => {  
       return (           
-        
-        <TouchableOpacity style={Gallery.CardBox} onPress={()=>{ this.ImgT(this.state.img);}}>   
-        <Image style={(Gallery.Photos2)}
-          source={{uri:img}}/>  
-        </TouchableOpacity>  
+        <View style={Gallery.RecordBox}>       
+        <Image style={Gallery.Photos2}
+          source={{uri:img}}/>       
+        </View>
         
       )
      })
@@ -126,9 +125,9 @@ return response.json()
     return this.state.vid.map((vid) => {  
       return (           
         
-        <View style ={(Gallery.CardBox)}>   
+        <View style ={(Gallery.RecordBox)}>   
         <Video
-              source={{ uri:'http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4'}}
+              source={{ uri:vid}}
                             rate={1.0}
                             volume={1.0}
                             isMuted={false}
@@ -136,7 +135,7 @@ return response.json()
                             shouldPlay ={false}
                             isLooping ={false}
                             useNativeControls
-              style={ {width:'100%' , height:'100%'}}
+              style={ {width:'100%' , height:220}}
             /> 
         </View>   
         
@@ -170,11 +169,11 @@ return response.json()
       }
       else{
       return (
-      <ImageBackground source={require('../../images/Gallery_background.png')} style = {Gallery.container}>         
-      <TouchableOpacity onPress ={() => this.props.navigation.goBack()} style = {Gallery.backbutton}>
-      <Image source={require('../../images/retune.png')} style = {Gallery.back}>
+      <ImageBackground source={require('../../images/Gallery_background.png')} style = {Gallery.container}>   
+      <TouchableOpacity onPress ={() => this.props.navigation.goBack()} style = {Gallery.R_backbutton}>
+      <Image source={require('../../images/retune.png')} style = {Gallery.R_back}>
       </Image>
-      </TouchableOpacity>    
+      </TouchableOpacity>   
       <View style ={(Gallery.container2)}>      
       
       <ScrollView >
