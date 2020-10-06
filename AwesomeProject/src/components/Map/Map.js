@@ -1,7 +1,8 @@
 import React, { Component,useState, useEffect  } from 'react';
-import { View, ScrollView, SafeAreaView,StyleSheet ,TouchableOpacity,Image,Alert,Text,ImageBackground,BackHandler,Switch } from 'react-native';
+import { View, ScrollView, SafeAreaView,StyleSheet ,TouchableOpacity,Image,Alert,Text,ImageBackground,BackHandler,Switch,TextInput } from 'react-native';
 import { WebView } from 'react-native-webview';
 import * as Location from 'expo-location';
+import '../../data/GlobalVariable.js';
 import Modal, {
   ModalTitle,
   ModalContent,
@@ -12,7 +13,7 @@ import Modal, {
 } from 'react-native-modals';
 
 export default class App extends Component {
-  
+
   getLocationTGOS(){
       this._getLocation();
       this.webref.injectJavaScript(`WGS84toTWD97(`+this.state.currentlongitude+`,`+this.state.currentlatitude+`);`);
@@ -22,6 +23,21 @@ export default class App extends Component {
     {
      this.setState(previousState => ({ content: !previousState.content }))
     }
+
+  onSearchPress = async () =>{
+    this.setState({ bottomModalAndTitle: false });
+    global.GlobalVariable.searchtext = this.state.search_text;
+    this.props.navigation.navigate("SearchMap",{callHome:this.movetosearchbutton.bind(this)})
+
+  }
+  movetosearchbutton(){
+    if(global.GlobalVariable.searchoption != ''){
+      console.log(global.GlobalVariable.searchoption)
+      this.state.searchoption = global.GlobalVariable.searchoption;
+      this.webref.injectJavaScript(`searchresult('`+this.state.searchoption+`');`);
+    }
+  }
+
 
   setTGOSMapType(maptype){
      this.webref.injectJavaScript(`setMapType('`+maptype+`');`);
@@ -45,12 +61,13 @@ export default class App extends Component {
      currentlatitude:'',
      bottomModalAndTitle: false,
      bottomModal: false,
-     
    }
+
    
     componentDidMount(){
      this._getLocation();
      BackHandler.addEventListener("hardwareBackPress", this.backAction);  //返回鍵監聽
+
     }
 
     componentWillUnmount() {
@@ -60,6 +77,35 @@ export default class App extends Component {
     toggleSwitch = (value) => {
         this.setState({usermarkerswitchValue: value})
         this.webref.injectJavaScript(`toggleuserMarker()`);
+    }
+    //--------------------------座標篩選Function--------------------------
+    toggleschoolvisibleSwitch = (value) =>{
+        this.setState({schoolvisible: value})
+        this.webref.injectJavaScript(`markervisible('school')`);
+    }
+    togglecitizenvisibleSwitch = (value) =>{
+        this.setState({citizenvisible: value})
+        this.webref.injectJavaScript(`markervisible('citizen')`);
+    }
+    togglebutterflyvisibleSwitch = (value) =>{
+        this.setState({butterflyvisible: value})
+        this.webref.injectJavaScript(`markervisible('butterfly')`);
+    }
+    toggleshopvisibleSwitch = (value) =>{
+        this.setState({shopvisible: value})
+        this.webref.injectJavaScript(`markervisible('shop')`);
+    }
+    togglefarmvisibleSwitch = (value) =>{
+        this.setState({farmvisible: value})
+        this.webref.injectJavaScript(`markervisible('farm')`);
+    }
+    togglefireflyvisibleSwitch = (value) =>{
+        this.setState({fireflyvisible: value})
+        this.webref.injectJavaScript(`markervisible('firefly')`);
+    }
+    toggleecologyvisibleSwitch = (value) =>{
+        this.setState({ecologyvisible: value})
+        this.webref.injectJavaScript(`markervisible('ecology')`);
     }
    
    _getLocation = async() =>{
@@ -95,8 +141,22 @@ export default class App extends Component {
                   usermarkerswitchValue: false,
                   content: false,
                   markertitle:null,
+                  markeraddress:null,
+                  markerwebsite:null,
+                  markerdescription:null,
+                  searchtext:null,
+                  searchoption:null,
+
+                  schoolvisible:true,
+                  citizenvisible:true,
+                  butterflyvisible:true,
+                  shopvisible:true,
+                  farmvisible:true,
+                  fireflyvisible:true,
+                  ecologyvisible:true,
                   };
-    
+
+     
   }
  
   onWebViewMessage = (event) => {
@@ -128,18 +188,20 @@ export default class App extends Component {
           //injectedJavaScript='window.ReactNativeWebView.postMessage(document.documentElement.scrollHeight)'
            
           onMessage={(event) => {
-            
-            if(this.state.content == false){
-              this.setState(previousState => ({ content: !previousState.content }))
+            const message = JSON.parse(event.nativeEvent.data)
+            if(message.command === 'get info'){            //接收座標資訊
+               this.state.markertitle = message.payload.title;
+               this.state.markeraddress = message.payload.address;
+               this.state.markerwebsite = message.payload.website;
+               this.state.markerdescription = message.payload.description;
+               if(this.state.content == false){
+                this.setState(previousState => ({ content: !previousState.content }))
+              }
             }
-          
-            this.state.markertitle = event.nativeEvent.data;
-             this.forceUpdate();
+            
+            this.forceUpdate();
           }}
-
-          
-
-        />
+          />
         
         {
         this.state.content ? 
@@ -147,26 +209,21 @@ export default class App extends Component {
         <View style={styles.card}>
         
           <Text style={styles.markertitle}> {this.state.markertitle} </Text>
-          
+          <Text style={styles.markerdescription}> 地址: {this.state.markeraddress} </Text>
+          <Text style={styles.markerdescription}> 網址: {this.state.markerwebsite} </Text>
+          <Text style={styles.markerdescription}>  {this.state.markerdescription} </Text>
         </View>
         <TouchableOpacity style = {styles.closebutton}
            onPress={this.onClosePress.bind(this)}>        
             <Image style={styles.buttonimage}
           source={require("../../images/close.png")}/>
         </TouchableOpacity>
-          
-          
           <View style ={styles.bottomspace}>
-
           </View>
-          
          </View> : null
        }
 
         </View>
-
-        
-
 
         <View style = {styles.buttonview} >
         <TouchableOpacity style = {styles.button} onPress={() =>this.getLocationTGOS()}>
@@ -190,7 +247,7 @@ export default class App extends Component {
       <Modal.BottomModal
           visible={this.state.bottomModalAndTitle}
           onTouchOutside={() => this.setState({ bottomModalAndTitle: false })}
-          height={0.5}
+          height={0.8}
           width={1}
           onSwipeOut={() => this.setState({ bottomModalAndTitle: false })}
           modalTitle={
@@ -214,7 +271,8 @@ export default class App extends Component {
               backgroundColor: '#FBFADF',
             }}
           >
-
+          <View style = {styles.margin}>
+          
           <Text style = {styles.modalstext}>
           地圖類型:
           </Text>
@@ -264,26 +322,97 @@ export default class App extends Component {
           </TouchableOpacity>
 
           </View>
+          
+          <View style = {styles.searchview}>
+            <TextInput style = {styles.inputBox} placeholder = "搜尋座標" underlineColorAndroid= 'rgba(0,0,0,0)' onChangeText={(search_text) => this.setState({search_text})}/>
+            <TouchableOpacity style = {styles.searchbutton} onPress = {this.onSearchPress.bind(this)}>
+              <Image style={styles.buttonimage} source={require("../../images/glass.png")}/>
+            </TouchableOpacity>
+          </View>
+        <View style = {styles.border}>
           <Text style = {styles.modalstext}>
-          點選新增座標功能:
+            座標篩選:
           </Text>
-          <Switch
-
-         onValueChange = {this.toggleSwitch} 
-         value = {this.state.usermarkerswitchValue}/>
-
-         <Text style = {styles.modalstext}>
-          座標篩選:
-          </Text>
-         <Switch
-         />
-         <Switch
-         />
-         <Switch
-         />
-         <Switch
-         />
-            
+          <View style = {styles.switchview}>
+            <Image style={styles.mapfilterimage}
+            source={require("../../images/SchoolC.png")}/>
+            <Text style = {styles.modalstext}>
+              學校:
+            </Text>
+            <Switch
+            onValueChange = {this.toggleschoolvisibleSwitch} 
+            value = {this.state.schoolvisible}
+            />
+         </View>
+         <View style = {styles.switchview}>
+            <Image style={styles.mapfilterimage}
+            source={require("../../images/citizenfarmC.png")}/>
+            <Text style = {styles.modalstext}>
+              市民農園:
+            </Text>
+            <Switch
+            onValueChange = {this.togglecitizenvisibleSwitch} 
+            value = {this.state.citizenvisible}
+            />
+         </View>
+         <View style = {styles.switchview}>
+            <Image style={styles.mapfilterimage}
+            source={require("../../images/butterflyC.png")}/>
+            <Text style = {styles.modalstext}>
+              蝴蝶園:
+            </Text>
+            <Switch
+            onValueChange = {this.togglebutterflyvisibleSwitch} 
+            value = {this.state.butterflyvisible}
+            />
+         </View>
+         <View style = {styles.switchview}>
+            <Image style={styles.mapfilterimage}
+            source={require("../../images/shopC.png")}/>
+            <Text style = {styles.modalstext}>
+              商店:
+            </Text>
+            <Switch
+            onValueChange = {this.toggleshopvisibleSwitch} 
+            value = {this.state.shopvisible}
+            />
+         </View>
+         <View style = {styles.switchview}>
+            <Image style={styles.mapfilterimage}
+            source={require("../../images/FarmC.png")}/>
+            <Text style = {styles.modalstext}>
+              農場:
+            </Text>
+            <Switch
+            onValueChange = {this.togglefarmvisibleSwitch} 
+            value = {this.state.farmvisible}
+            />
+         </View>
+         <View style = {styles.switchview}>
+            <Image style={styles.mapfilterimage}
+            source={require("../../images/fireflyC.png")}/>
+            <Text style = {styles.modalstext}>
+              螢火蟲區:
+            </Text>
+            <Switch
+            onValueChange = {this.togglefireflyvisibleSwitch} 
+            value = {this.state.fireflyvisible}
+            />
+         </View>
+         <View style = {styles.switchview}>
+            <Image style={styles.mapfilterimage}
+            source={require("../../images/ecologyC.png")}/>
+            <Text style = {styles.modalstext}>
+              生態園區:
+            </Text>
+            <Switch
+            onValueChange = {this.toggleecologyvisibleSwitch} 
+            value = {this.state.ecologyvisible}
+            />
+         </View>
+         
+            </View>
+            </View>
           </ModalContent>
         </Modal.BottomModal>
 
@@ -305,7 +434,6 @@ const styles = StyleSheet.create({
       upperspace:{
         width: '100%', 
          height: '10%',
-         
          marginBottom:'5%'
         },
 
@@ -348,11 +476,11 @@ const styles = StyleSheet.create({
    width: '100%', 
    height: '100%',
    resizeMode:'stretch',
-   
   },
   modalstext:{
+    left:'2%',
     fontSize:20,
-    paddingTop:'2%',
+    //paddingTop:'2%',
   },
   maptypebutton:{
         width:'25%',
@@ -362,7 +490,8 @@ const styles = StyleSheet.create({
   morefeaturebuttonview:{
       flexDirection: 'row',
       justifyContent: 'space-between',
-      height:'30%',
+      height:'23%',
+      
     },
   maptypetext:{
     fontSize:20,
@@ -400,5 +529,47 @@ const styles = StyleSheet.create({
       top:'3%',
       left:'3%',
       fontSize:30,
+    },
+    markerdescription:{
+      fontSize:20,
+      top:'2%',
+      left:'4%',
+    },
+    border:{
+      //paddingTop:'2%',
+      borderColor:"gray",
+      borderWidth:1,
+      borderRadius:10,
+    },
+    margin:{
+      justifyContent:"space-between",
+    },
+    switchview:{
+       flexDirection: 'row',
+       justifyContent:"space-between",
+       height:"9%",
+    },
+    mapfilterimage:{
+       width: "12%", 
+       height: "100%",
+       resizeMode:'stretch',
+    },
+        inputBox:{
+        width:'100%',
+        backgroundColor:'#FFFFFF',
+        borderRadius: 5,
+        borderWidth:1,
+        paddingHorizontal:20,
+        fontSize:25,
+        marginVertical: 10,
+        
+    },
+    searchview:{
+      flexDirection: 'row',
+      width:'85%',
+      height:'10%',
+    },
+    searchbutton:{
+       width:'15%',
     }
 });

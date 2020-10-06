@@ -20,7 +20,13 @@
                 
                     js.src = "WebTGOSMap.js?v=" + v;
 					
-                
+					function toggle(){
+					var blur = document.getElementById('blur');
+					blur.classList.toggle('active');
+					var popupdetail = document.getElementById('popupdetail');
+					popupdetail.classList.toggle('active');
+					}
+					
                 </script>
     
                          
@@ -32,18 +38,25 @@
     </head>
     
     <body style="margin:0px ; font-family: Microsoft JhengHei;" onload="InitWnd();">
-
+	<>
+	
+	
     
-    
+	
      <div id="OMap" style=" width:100%; height: 100%; border:0px solid #000000;">
-	 
+		
+		
 		<div class="sidebar" id = "mySidebar"> 
 		<div class = "toggle-btn" onclick="toggleSidebar()">
 		<span></span>
 		<span></span>
 		<span></span>
 		</div>
-		
+			<div class="blurcontainer" id="blur">
+			<div class= "popupdetail" id= "popupdetail">
+			<h2>Test</h2>
+			</div>
+			</div>
 		<div>
 		 <li>小小觀察+ TGOS地圖</li>
 		</div>
@@ -56,6 +69,10 @@
 				<div class="tab-content">
 					<li id = "markerdetailtitle">請選擇地圖座標!</li>
 					<p id = "markerdetail"></p>
+					<p id = "longandlat"></p>
+					<input type="button" value="查看Google街景" id="streetviewbutton" onclick="openstreetview()">
+					<input type="button" value="查看種植/飼養紀錄" id="detailbutton" onclick="toggle()">
+					
 				</div>
 			</div>
 		</div>
@@ -97,11 +114,15 @@
 			</div>
 		</div>
 		
-		
-		
 		</div>
-		
+
+	 
+	 
 	 
 	 </div>
-    
+     </div>
+	 
+	 
+	
+	 
     </html>

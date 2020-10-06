@@ -23,6 +23,7 @@ import MeasurePhotoConfirm from '../src/components/Measure/MeasurePhotoConfirm';
 import Gallery from '../src/components/Gallery/Gallery';
 import Data_record from '../src/components/Gallery/Data_record';
 import GW_date from '../src/components/GoodWork/GW_date';
+import SearchMap from '../src/components/Map/SearchMap';
 const components = {
         SignIn: {
         screen: SignIn,
@@ -221,6 +222,14 @@ const components = {
         navigationOptions:{
             header: null,
             title:'GW_date',
+            
+        }
+    },
+        SearchMap: {
+        screen: SearchMap,
+        navigationOptions:{
+            header: null,
+            title:'SearchMap',
             
         }
     },

@@ -18,39 +18,42 @@ export default class App extends React.Component {
            isLoading:true,
            mute: false,
            shouldPlay: true,
+           obj_key:"",
           }
         }
   componentDidMount()
   {
-      var queryURL = 'https://observerplus.club/API/test.aspx';
-      let parameters = new FormData();
-        
+     this.state.obj_key = this.props.navigation.getParam("obj_key");
+     this.forceUpdate();
+     this.Send();
+  }
 
+  Send = () =>{
+    
+      var queryURL = 'https://observerplus.club/API/Memoirs.aspx';
+      let parameters = new FormData();
+      parameters.append("account", global.GlobalVariable.account);
+      parameters.append("password", global.GlobalVariable.password);  
+      parameters.append("obj_ID",this.state.obj_key);
       fetch(queryURL,{
-        method: 'GET',
-        //body: parameters
+        method: 'POST',
+        body: parameters,
             })
-    // response.json() => 把 response 的資料轉成 json
-    // 如果你想要原封不動的接到 response 的資料，可以用 response.text()
-    .then((response) => response.json() )
-    .then((responseData) =>  { 
-      for (var i = 0 ; i < responseData.length;i++) {
-       this.state.Gallery.push(responseData[i])   
-      }
-      console.log(this.state.Gallery)
-      /*for (var i = 0 ; i < this.state.Gallery[i].Img.length;i++) {
-       this.state.img.push(this.state.Gallery.Img[])       
-      }*/
-      this.forceUpdate()
-      this.setState({isLoading:false})
+      // response.json() => 把 response 的資料轉成 json
+      // 如果你想要原封不動的接到 response 的資料，可以用 response.text()
+      .then((response) => response.json() )
+      .then((responseData) =>  { 
+        for (var i = 0 ; i < responseData.length;i++) {
+        this.state.Gallery.push(responseData[i])   
+        }
+        console.log(this.state.Gallery)
+        this.setState({isLoading:false})
     })
     .catch((error) => {
       console.warn(error);
     })
     .done();
   }
-
-
   /*handleVideoRef = async (component) => {
       if (component && !this.playbackObject) {
         this.playbackObject = component;
@@ -63,7 +66,7 @@ export default class App extends React.Component {
       console.log(item.Type1)
       if (item.Type1 == "jpg" ) {
         return(
-          <TouchableOpacity onPress ={()=>{ this.props.navigation.navigate("Data_record",{"ID":item.ID});}} style ={(Gallery.CardBox2)}>
+          <TouchableOpacity onPress ={()=>{ this.props.navigation.navigate("Data_record",{"rcd_ID":item.ID});}} style ={(Gallery.CardBox2)}>
            <Image style={Gallery.Photos}
           source={{uri:item.Media1}}/>          
           </TouchableOpacity>
@@ -93,7 +96,7 @@ export default class App extends React.Component {
       console.log(item.Type2)
       if (item.Type2 == "jpg" ) {
         return(
-          <TouchableOpacity onPress ={()=>{ this.props.navigation.navigate("Data_record",{"ID":item.ID});}} style ={(Gallery.CardBox3)}>
+          <TouchableOpacity onPress ={()=>{ this.props.navigation.navigate("Data_record",{"rcd_ID":item.ID});}} style ={(Gallery.CardBox3)}>
            <Image style={Gallery.Photos}
           source={{uri:item.Media2}}/>          
           </TouchableOpacity>
@@ -161,7 +164,7 @@ export default class App extends React.Component {
             <Text style ={(Gallery.Contents)}>{item.Re}</Text>            
             {this.ImgorVideo(item)}
             {this.ImgorVideo2(item)}
-          <TouchableOpacity onPress ={()=>{ this.props.navigation.navigate("Data_record",{"ID":item.ID});}} style ={(Gallery.CardBox4)}>
+          <TouchableOpacity onPress ={()=>{ this.props.navigation.navigate("Data_record",{"rcd_ID":item.ID});}} style ={(Gallery.CardBox4)}>
             <Text style ={(Gallery.OverFlow)}>{item.Overflow}</Text> 
           </TouchableOpacity>
         </View>       

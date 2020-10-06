@@ -11,14 +11,16 @@ export default class Task extends React.Component {
         this.state = {
            task:"",
            isLoading:true,
+           obj_ID:"",
         }   
       }
   componentDidMount()
-  {
+  {   
+      this.forceUpdate();
+      this.state.obj_ID = this.props.navigation.getParam("obj_key");
       var queryURL = 'https://observerplus.club/API/Mission.aspx';
       let parameters = new FormData();
-      parameters.append("account", global.GlobalVariable.account);
-      parameters.append("password", global.GlobalVariable.password);
+      parameters.append("obj_ID",this.state.obj_ID);
   fetch(queryURL,{
     method: 'POST',
     body: parameters
@@ -30,6 +32,7 @@ export default class Task extends React.Component {
       this.setState({isLoading:false})
       this.setState({task:responseData})
       console.log(this.state.task);
+      console.log(this.state.task.mis_ID);
     })
     .catch((error) => {
       console.warn(error);
@@ -39,16 +42,20 @@ export default class Task extends React.Component {
 
   Send = () => 
   {
-        var queryURL = 'http://192.192.155.112/API/Water.aspx';
-        //let parameters = new FormData();
-  fetch(queryURL/*,{
+        var queryURL = 'https://observerplus.club/API/Water.aspx';
+        let parameters = new FormData();
+        parameters.append("obj_ID",this.state.obj_ID);
+  fetch(queryURL,{
     method: 'POST',
     body: parameters
-  }*/)
+  })
     .then((response) => response.json() )
     .then((responseData) => { 
+      if(responseData.message == true){
+        this.state.task.Miswater = true;
+        this.forceUpdate();
+      }
       console.log(responseData);
-      this.setState({task:responseData})
       console.log(this.state.task.Miswater);       
     })
     .catch((error) => {
@@ -177,20 +184,24 @@ export default class Task extends React.Component {
     if(this.state.task.Examount1 == false)
     {
       let Dailey_Exam_ID = this.state.task.Dailey_Exam_ID
-      this.props.navigation.navigate("ExamA",{"Dailey_Exam_ID":Dailey_Exam_ID})
+      let mis_ID = this.state.task.mis_ID
+      this.props.navigation.navigate("ExamA",{"mis_ID":mis_ID ,"Dailey_Exam_ID":Dailey_Exam_ID})
     }
     else if(this.state.task.Examount1 == true && this.state.task.Examount2 == false)
     {
       let Dailey_Exam_ID = this.state.task.Dailey_Exam_ID
-      this.props.navigation.navigate("ExamB",{"Dailey_Exam_ID":Dailey_Exam_ID})
+      let mis_ID = this.state.task.mis_ID
+      this.props.navigation.navigate("ExamB",{"Dailey_Exam_ID":Dailey_Exam_ID,"mis_ID":mis_ID})
     }
     else if(this.state.task.Examount1 == true && this.state.task.Examount2 == true && this.state.task.Examount3 == false)
     {
       let Dailey_Exam_ID = this.state.task.Dailey_Exam_ID
-      this.props.navigation.navigate("ExamC",{"Dailey_Exam_ID":Dailey_Exam_ID})
+      let mis_ID = this.state.task.mis_ID
+      this.props.navigation.navigate("ExamC",{"Dailey_Exam_ID":Dailey_Exam_ID,"mis_ID":mis_ID})
     }
     else
     {     
+      alert("今日題目以做完")
     }
     
   }
@@ -198,7 +209,8 @@ export default class Task extends React.Component {
   {
     if(this.state.task.DaileyImage == false)
     {
-      this.props.navigation.navigate("Measure");
+      let obj_token = this.props.navigation.getParam('obj_token');
+      this.props.navigation.navigate("Measure",{"obj_token":obj_token});
     }
   }
   task4_change()

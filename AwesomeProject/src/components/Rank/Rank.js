@@ -1,45 +1,62 @@
 import React, {Component} from 'react';  
-import {Platform,ImageBackground, StyleSheet,FlatList,ScrollView, Text, View,TouchableOpacity,Image} from 'react-native';
+import {Platform,ImageBackground,ActivityIndicator, StyleSheet,FlatList,ScrollView, Text, View,TouchableOpacity,Image} from 'react-native';
 import '../../data/GlobalVariable.js';
   
 export default class App extends React.Component {  
   constructor() {
     super();
     this.state = {
-      myrank:"",
       rank:[],
+      myrank:[],
       levelscore: 0,
       levelstep: 0,
+      number: 0,
+      isLoading:true,
+      }
     }
-    
-    var queryURL = 'https://observerplus.club/API/Rank.aspx';
-      let parameters = new FormData();
-        
+
+      componentDidMount()
+  {
+      global.a = [];
+      var queryURL = 'https://observerplus.club/API/Rank.aspx';
+        let parameters = new FormData();
+        parameters.append("account", global.GlobalVariable.account);
+        parameters.append("password", global.GlobalVariable.password);
+        parameters.append("obj_ID", this.props.navigation.getParam('obj_key'));
 
       fetch(queryURL,{
-        method: 'GET',
-        //body: parameters
-            })
-    // response.json() => 把 response 的資料轉成 json
-    // 如果你想要原封不動的接到 response 的資料，可以用 response.text()
-    .then((response) => response.json() )
-    .then((responseData) => { 
-      if (responseData) {
-        // 接到 Data      
-        for (var i = 0 ; i < responseData.length;i++) {
-        this.state.rank.push(responseData[i])  
+      method: 'POST',
+      body: parameters
+    })
+      // response.json() => 把 response 的資料轉成 json
+      // 如果你想要原封不動的接到 response 的資料，可以用 response.text()
+      .then((response) => response.json() )
+      .then((responseData) => { 
+        for (var i = 0 ; i < responseData.length-1;i++) {
+        this.state.rank.push(responseData[i]) 
+        this.state.number += 1;
         }
-        this.setState({myrank:responseData[0]})
-        console.log(this.state.rank);
-        console.log(responseData[0]);
-      } 
-    })
-    .catch((error) => {
-      console.warn(error);
-    })
-    .done();
-  }
+        console.log(this.state.rank)
+        console.log(this.state.number)
+        this.setState({ myrank:responseData[this.state.number] });
+        this.setState({ isLoading: false });  
+        console.log(this.state.myrank)
+      })
+      .catch((error) => {
+        console.warn(error);
+      })
+      .done();
+    }
+
   render() {  
+    if(this.state.isLoading){
+        return(
+          <View style ={styles.background}>
+          <ActivityIndicator size="large" color="#0000ff"/>
+          </View>
+        )
+      }
+    else{
     return (
     <ImageBackground source={require('../../images/Rank_Background.png')} style = {styles.background}>
      <View style ={styles.upperspace}>
@@ -47,34 +64,33 @@ export default class App extends React.Component {
           <Image style={styles.back}
           source={require("../../images/retune.png")}/>
         </TouchableOpacity>
-        </View>
-        <View style = {styles.MyCard}>
-        </View>
+        </View> 
         <View style ={(styles.MyReallyCard)}> 
-        <Text style ={(styles.Ranknumber)}>{this.state.myrank.rank}</Text>
-            <Text style ={(styles.Rankname)}>{this.state.myrank.name}</Text>
-            <Text style ={(styles.Ranklevel)}>{"等級:"+this.state.myrank.level}</Text>   
-            <Text style ={(styles.RankScore)}>{this.state.myrank.score+"分"}</Text>  
-        </View>   
+          <Text style ={(styles.Ranknumber)}>{this.state.myrank.rank}</Text>
+          <Text style ={(styles.Rankname)}>{this.state.myrank.name}</Text>
+          <Text style ={(styles.Ranklevel)}>{"等級:"+this.state.myrank.levelname}</Text>   
+          <Text style ={(styles.RankScore)}>{this.state.myrank.score+"分"}</Text>  
+        </View>  
     <View style = {styles.RankCard}>
     <FlatList data = {this.state.rank} 
         keyExtractor={(item, key) =>key.toString()}
         renderItem = {({item})=>{
         return(
-        <ScrollView>   
+        <ScrollView>     
         <View style ={(styles.ReallyCard)}>    
             <Text style ={(styles.Ranknumber)}>{item.rank}</Text>
             <Text style ={(styles.Rankname)}>{item.name}</Text>
-            <Text style ={(styles.Ranklevel)}>{"等級:"+item.level}</Text>   
+            <Text style ={(styles.Ranklevel)}>{"等級:"+item.levelname}</Text>   
             <Text style ={(styles.RankScore)}>{item.score+"分"}</Text>  
-          </View>       
+          </View>   
         </ScrollView>
         );
       }}
       />   
     </View>
     </ImageBackground>
-    );  
+    );
+    }  
   }  
 } 
 

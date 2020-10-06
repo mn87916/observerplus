@@ -6,7 +6,7 @@ import {
   PieChart,
   ProgressChart,
   ContributionGraph,
-  StackedBarChart
+  StackedBarChart,
 } from "react-native-chart-kit";
 import '../../data/GlobalVariable.js';
 import { Globalstyles } from '../../style/Global';
@@ -17,48 +17,59 @@ export default class App extends React.Component{
   constructor() {
     super();
     this.state = {
-      
+      obj_ID:"",
       isLoading:true,
+      datesplit:[],
+      datefix:[],
+      dates:[],
       data: {
            labels: [],
            datasets: [
                {
                    data: []
-               }
-           ]
-       }
+                }
+            ]
+        }
+      }
     }
-    
+    componentDidMount()
+    {
+    this.state.obj_ID = this.props.navigation.getParam("obj_key");
     const self = this;
-    var queryURL = 'http://observerplus.club/API/Record.aspx';
+    var queryURL = 'https://observerplus.club/API/Record.aspx';
       let parameters = new FormData();
-        
+      parameters.append("account", global.GlobalVariable.account);
+      parameters.append("password", global.GlobalVariable.password);  
+      parameters.append("obj_ID",this.state.obj_ID);
 
       fetch(queryURL,{
-        method: 'GET',
-        //body: parameters
+        method: 'POST',
+        body: parameters
             })
     // response.json() => 把 response 的資料轉成 json
     // 如果你想要原封不動的接到 response 的資料，可以用 response.text()
     .then((response) => response.json() )
     .then((responseData) => { 
+      for(var i =0;i<responseData.length;i++){
+         this.state.datesplit.push(responseData[i].Date.split("/"))
+         this.forceUpdate()
+         this.state.datefix.push(this.state.datesplit[i][1]+"/"+this.state.datesplit[i][0])
+      }
+       this.forceUpdate()
+      console.log(this.state.datefix)
       
-
       const dataClone = {...self.state.data}
 
       const values = responseData.map(value => value.Height);
-      const valuesdate = responseData.map(value => value.Date);
+      const valuesdate = this.state.datefix.map(value => value);
 
       dataClone.datasets[0].data = values ;
-
-      
-
       dataClone.labels = valuesdate;
-
+      
       self.setState({
         data: dataClone,
       });
-
+      //console.log(this.state.data)
       this.forceUpdate()
       this.setState({isLoading:false})
     })
@@ -66,7 +77,7 @@ export default class App extends React.Component{
       console.warn(error);
     })
     .done();
-  }
+    }
 
 
 
@@ -74,7 +85,7 @@ export default class App extends React.Component{
       if(this.state.isLoading){
         return(
           
-          <ImageBackground source={require('../../images/article_background.png')} style = {Globalstyles.Background}>
+          <ImageBackground source={require('../../images/Track_growth.png')} style = {Globalstyles.Background}>
 
           <View style ={styles.background}>
      <View style ={styles.upperspace}>
@@ -99,7 +110,7 @@ export default class App extends React.Component{
 
 
         return(
-<ImageBackground source={require('../../images/article_background.png')} style = {Globalstyles.Background}>
+<ImageBackground source={require('../../images/Track_growth.png')} style = {Globalstyles.Background}>
     <View style ={styles.background}>
      <View style ={styles.upperspace}>
         <TouchableOpacity style={styles.backbutton} onPress={()=>{ this.props.navigation.goBack();}}>
@@ -116,10 +127,11 @@ export default class App extends React.Component{
   <View style = {styles.linechart}>
   <LineChart
     data={this.state.data}
-    width={Dimensions.get("window").width * 0.9} // from react-native
-    height={Dimensions.get("window").height * 0.7}
+    width={Dimensions.get("window").width * 0.85} // from react-native
+    height={Dimensions.get("window").height * 0.8}
     //yAxisLabel="$"
     yAxisSuffix="公分"
+    svg={{fill: 'grey',}}
     yAxisInterval={1} // optional, defaults to 1
     chartConfig={{
       backgroundColor: "#e26a00",
@@ -128,24 +140,24 @@ export default class App extends React.Component{
       decimalPlaces: 2, // optional, defaults to 2dp
       color: (opacity = 1) => `rgba(250, 164, 91, ${opacity})`,
       labelColor: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
-      
-      style: {
-        borderRadius: 16
-      },
       propsForDots: {
         r: "6",
         strokeWidth: "2",
-        stroke: "#ffa726"
+        stroke: "#ffa726",
+        
       }
     }}
     bezier
     style={{
-      marginVertical: 8,
-      borderRadius: 16
+      top:-80,
+      paddingTop:100,
+      paddingRight:80,
+      //marginVertical: 8,
+      borderRadius: 16,
     }}
   />
 </View>
-     <TouchableOpacity style = {styles.listbutton} onPress={()=>{ this.props.navigation.navigate("Recordtable");}}>
+     <TouchableOpacity style = {styles.listbutton} onPress={()=>{ this.props.navigation.navigate("Recordtable",{"obj_ID":this.state.obj_ID});}}>
                     
                         
        <Text style ={styles.buttonText}>顯示表格 > </Text>
@@ -191,22 +203,32 @@ const styles = StyleSheet.create({
     },
     linechart:{
       alignItems:'center',
-      
+      //fontSize: 30,
+      top:'7%',
+      left:'7.5%',
+      position: 'absolute',
     },
      container3: {
       alignItems:'flex-start',
-      marginLeft:'5%'
-    
-},
+      //backgroundColor:'#333',
+      //width:'40%',
+      alignItems:'center',
+      top:'3.5%',
+      left:'10%',
+      position: 'absolute',
+    },
       text: {
       fontSize:30,
-      backgroundColor:'#FBFADF',
-      borderRadius:25,
-      width:'50%',
-      textAlign :'center'
+      //backgroundColor:'#333',
+      //borderRadius:25,
+      textAlign :'center',
+      
+      
 },
       listbutton:{
-        left:'65%'
+        left:'65%',
+        top:'90%',
+        position: 'absolute',
       },
       
       buttonText:{

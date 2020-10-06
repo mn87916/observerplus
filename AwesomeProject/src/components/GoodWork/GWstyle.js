@@ -56,11 +56,11 @@ export const GWStyles = StyleSheet.create({
     shadowRadius:2,
     shadowOpacity:6,
     elevation:3,
-    backgroundColor:'#cfe1ff',
+    backgroundColor:'#fbd292',
     height:240,
     width:"70%",
     left:'15%',
-    borderWidth: 1,
+    //borderWidth: 1,
   },  
   toptext2:{  
     fontFamily:'nunito-bold',

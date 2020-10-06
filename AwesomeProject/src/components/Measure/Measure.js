@@ -6,31 +6,100 @@ import Constants from 'expo-constants';
 import * as Permissions from 'expo-permissions';
 import { Globalstyles } from '../../style/Global';
 import { Header } from 'react-navigation-stack';
-  
+import { Video } from 'expo-av';
+import { Camera } from 'expo-camera';
+import Indicator from './Indicator';
+import { Ionicons } from '@expo/vector-icons';
+import * as Location from 'expo-location';
+ 
 export default class App extends React.Component {
   constructor(props) 
         {
           super(props);
-          this.state = {plant_height: '',
+          this.state = {
+          currentDay: new Date(), 
+          plant_height: '',
           width : Dimensions.get('window').width,
           height : Dimensions.get('window').height,
           isLoading:true,
-          image1:'',
-          image2:'',
-          image3:'',
+          video2: true,
+          recording: false,
           img:[],
-          task1:"",
+          Sendimg:"",
+          Sendimg2:"",
+          vid:[],
+          feelings:"",
+          rulur:"",
+          water:"",
+          obj_key:"",
+          checkimage:false,
+          checkvideo:false,
+          obj_token:true,
+          NTPWeather:[],
+          TPWeather:[],
+          rcd_ID:"",
+          currentlongitude:"",
+          currentlatitude:"",
+          errorMessage:'',
+          location:"",
+          getweather:"",
+          getW_number:"",
+          TEMP:"",
           } 
         }
 
 
    componentDidMount() {
-    this.getPermissionAsync();
-      global.a = [];
-      global.b = 0;
-      global.c = -1;
-      this.setState({isLoading:false})
+     console.log(this.state.currentDay.getHours())
+      global.imagenumber = 0;
+      global.videonumber = 0;
+      this.state.obj_token = this.props.navigation.getParam("obj_token");
+      this.state.obj_key = this.props.navigation.getParam("obj_key");
+      console.log(this.props.navigation.getParam("obj_token"))
+     this.getPermissionAsync();
+     this.setState({isLoading:false})
+     console.log(this.state.feelings)
+     this._getLocation();
+     this.forceUpdate();
+     
   }
+
+   _getLocation = async() =>{
+     const {status} = await Location.requestPermissionsAsync();
+
+     if(status !== 'granted'){
+       console.log('沒權限');
+
+       this.setState({
+         errorMessage:'沒權限'
+       })
+     }
+
+     const location = await Location.getCurrentPositionAsync({
+       accuracy: Location.Accuracy.Highest
+     });
+     const place = await Location.reverseGeocodeAsync({
+            latitude : location.coords.latitude,
+            longitude : location.coords.longitude
+        });
+
+        /*let city;
+        place.find( p => {
+          city = p.city
+          setCity(p.city)
+        });*/
+
+     this.setState({location:place[0].region})
+
+     //Alert.alert('測試',JSON.stringify(this.state.location))
+     console.log(this.state.location);
+     console.log(place[0].region);
+     //console.log(location.coords.longitude);
+     //console.log(location.coords.latitude);
+     //this.state.currentlongitude = location.coords.longitude;
+     //this.state.currentlatitude = location.coords.latitude;
+     this.Getweather();
+   }
 
   getPermissionAsync = async () => {
     if (Constants.platform.ios) {
@@ -41,33 +110,242 @@ export default class App extends React.Component {
     }
   };
 
-  uploadImageAsync = (api)  =>{
-    let apiUrl = 'https://observerplus.club/API/Img.aspx';
-      var data = new FormData();  
-      data.append("file",{  
-        uri:api,
-        name:"file",
-        type:"image/jpg",
-        
-      })
+     SendPersonal = ()  =>{
+       
+      let apiUrl = 'https://observerplus.club/API/Upload_Record.aspx';
+      let parameters = new FormData();  
+      parameters.append("account", global.GlobalVariable.account);
+      parameters.append("password", global.GlobalVariable.password);
+      parameters.append("feelings",this.state.feelings);
+      parameters.append("height",this.state.rulur);
+      parameters.append("water",this.state.water);
+      parameters.append("obj_ID",this.state.obj_key);
+      parameters.append("weather",this.state.getW_number);
+      parameters.append("temp",this.state.temp);
+      console.log(parameters)
       fetch(apiUrl, {  
         headers: {
-          'Accept': 'application/json',
-          'Content-Type': 'multipart/form-data'
+          //'Accept': 'application/json',
+          //'Content-Type': 'multipart/form-data'
         },
         method: 'POST',
-        body: data
-      }).then(response => response.text())
-      .then(response => {
-          console.log('succ ')
-          //console.log(response)
-          this.props.navigation.navigate("Measure");
+        body: parameters
+      }).then((response) => response.json() )
+      .then((responseData) => { 
+          if(responseData.Message){
+            this.setState({rec_ID:responseData.rcd_ID})
+            if(this.state.checkimage == true){
+              this.Sendimage();
+            }
+            if(this.state.checkvideo == true){
+              this.Sendvideo();
+            }
+          }
+          else{
+            alert("今天已經記入過了~")
+          }
+          console.log(responseData)
         }
         ).catch(err => {
         console.log('err ')
         console.log(err)
       } )
       .done(); 
+    }
+
+     Sendimage = ()  =>{
+       console.log(this.state.Sendimg)
+       console.log(this.state.Sendimg2)
+      let apiUrl = 'https://observerplus.club/API/Img.aspx';
+      let parameters = new FormData();  
+      parameters.append("rcd_ID","14");
+      for(var i =0;i<imagenumber;i++){
+        parameters.append("file",{  
+        uri:this.state.img[i].image,
+        name:"file",
+        type:"image/jpg",
+        })
+      }
+      console.log(parameters)
+      fetch(apiUrl, {  
+        headers: {
+          //'Accept': 'application/json',
+          //'Content-Type': 'multipart/form-data'
+        },
+        method: 'POST',
+        body: parameters
+      }).then((response) => response.json())
+      .then((responseData) => { 
+          console.log(responseData)
+          //this.Sendvideo();
+        }
+        ).catch(err => {
+        console.log('err ')
+        console.log(err)
+      } )
+      .done(); 
+    }
+     
+
+     Sendvideo = ()  =>{
+       
+      let apiUrl = 'https://observerplus.club/API/Mp4.aspx';
+      let parameters = new FormData();  
+      parameters.append("rcd_ID","16");
+      for(var i =0;i<videonumber;i++){
+        parameters.append("file2",{  
+        uri:this.state.vid[i].vid,
+        name:"file2",
+        type:"video/mp4",
+      })
+      }
+      console.log(parameters)
+      fetch(apiUrl, {  
+        /*headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'multipart/form-data'
+        },*/
+        method: 'POST',
+        body: parameters
+      }).then((response) => response.json())
+      .then((responseData) => { 
+          console.log(responseData)
+        }
+        ).catch(err => {
+        console.log('err ')
+        console.log(err)
+      } )
+      .done(); 
+    }
+
+    Getweather = ()  =>{
+    if(this.state.location == "New Taipei City")
+    {
+      this.setState({getweather:"%E6%96%B0%E5%8C%97%E5%B8%82"})
+    }
+    else{
+      this.setState({getweather:"%E8%87%BA%E5%8C%97%E5%B8%82"})
+    }
+          let parameters = new FormData();
+          this.forceUpdate();
+          var queryURL = 'https://opendata.cwb.gov.tw/api/v1/rest/datastore/F-C0032-001?Authorization=CWB-681C8261-0F9A-4204-8B7E-45601731DD3B&format=JSON&locationName='+this.state.getweather+'&elementName=Wx,MinT,MaxT';
+          fetch(queryURL,{
+            method: 'GET',
+            //body: parameters
+                })
+        // response.json() => 把 response 的資料轉成 json
+        // 如果你想要原封不動的接到 response 的資料，可以用 response.text()
+        .then((response) => response.json() )
+        .then((responseData) =>  { 
+          //要傳給+7的資料
+          this.setState({getW_number:responseData.records.location[0].weatherElement[0].time[0].parameter.parameterValue}) 
+          console.log(this.state.getW_number)
+          var mint = parseInt(responseData.records.location[0].weatherElement[1].time[0].parameter.parameterName)
+          var maxt = parseInt(responseData.records.location[0].weatherElement[2].time[0].parameter.parameterName)
+          var temp = (mint+maxt)/2
+          this.setState({temp:temp})
+          console.log(this.state.temp)
+         if(responseData.records.location[0].weatherElement[0].time[0].parameter.parameterValue <=2)
+         {
+           console.log("123")
+         }
+         else if(responseData.records.location[0].weatherElement[0].time[0].parameter.parameterValue <= 5)
+         {
+           
+         }
+         /*晴天:1-2
+          多雲:3-5
+          陰天:6-7
+          雨天:>=8*/
+         /* for (var i = 0 ; i < 3;i++) {
+          this.state.NTPWeather.push({
+              LocationName:responseData.records.location[0].locationName,
+              Weather:responseData.records.location[0].weatherElement[0].time[i].parameter.parameterName,
+              MinT:responseData.records.location[0].weatherElement[1].time[i].parameter.parameterName,
+              MaxT:responseData.records.location[0].weatherElement[2].time[i].parameter.parameterName,
+              Time:responseData.records.location[0].weatherElement[0].time[i].endTime,
+            })   
+          }
+          for (var i = 0 ; i < 3;i++) {
+          this.state.TPWeather.push({
+              LocationName:responseData.records.location[1].locationName,
+              Weather:responseData.records.location[0].weatherElement[0].time[i].parameter.parameterName,
+              MinT:responseData.records.location[1].weatherElement[1].time[i].parameter.parameterName,
+              MaxT:responseData.records.location[1].weatherElement[2].time[i].parameter.parameterName,
+              Time:responseData.records.location[1].weatherElement[0].time[i].endTime,
+            })   
+          }*/
+          //console.log(this.state.NTPWeather)
+          //console.log(this.state.TPWeather)
+          //console.log("test:")
+          //console.log(responseData.records.location[0].weatherElement[0])
+          /*for (var i = 0 ; i < this.state.Gallery[i].Img.length;i++) {
+          this.state.img.push(this.state.Gallery.Img[])       
+          }*/
+          //this.setState({isLoading:false})
+        })
+        .catch((error) => {
+          console.warn(error);
+        })
+        .done();
+    }
+
+    checkNumber = (theObj) => {
+      var reg = /^[0-9]+.?[0-9]*$/;
+      if (reg.test(theObj)) {
+        return true;
+      }
+      return false;
+    }
+
+    Check = () => {
+      this.forceUpdate();
+      if(this.state.obj_token){
+        if(this.checkNumber(this.state.rulur) ==false || this.checkNumber(this.state.water) ==false || this.state.feelings ==""){
+          alert("請檢查測量長度、水和心得是否輸入正確資料^.^")
+        }
+        else{
+          if(this.state.img.length == 0 && this.state.vid.length == 0){
+            alert("照片或影片至少要一張喔~!")
+          }
+          else if(this.state.img.length != 0 && this.state.vid.length == 0){
+          this.setState({checkimage:true})
+          this.SendPersonal();
+          }
+          else if(this.state.img.length == 0 && this.state.vid.length != 0){
+          this.setState({checkvideo:true})
+          this.SendPersonal();
+          }
+          else{
+          this.setState({checkimage:true})
+          this.setState({checkvideo:true})
+          this.SendPersonal();
+          }
+        }
+      }
+      else{
+        if(this.checkNumber(this.state.water) ==false || this.state.feelings ==""){
+            alert("請檢查測量長度和心得是否輸入資料")
+          }
+        else{
+          if(this.state.img.length == 0 && this.state.vid.length == 0){
+            alert("照片或影片至少要一張喔~!")
+          }
+          else if(this.state.img.length != 0 && this.state.vid.length == 0){
+          this.setState({checkimage:true})
+          this.SendPersonal();
+          }
+          else if(this.state.img.length == 0 && this.state.vid.length != 0){
+          this.setState({checkvideo:true})
+          this.SendPersonal();
+          }
+          else{
+          this.setState({checkimage:true})
+          this.setState({checkvideo:true})
+          this.SendPersonal();
+          }
+        }
+      }
     }
 
   _pickImage = async () => {
@@ -79,34 +357,84 @@ export default class App extends React.Component {
         quality: 1,
       });
       if (!result.cancelled) {
-        b++;
-        c++;
-          //console.log(item);
-          a[c] ={id:c,image:result.uri};
+        imagenumber++;
+        if(imagenumber >=2)
+        {
+          this.setState({Sendimg2:result.uri});
+        }
+        else
+        {
+          this.setState({Sendimg:result.uri});
+        }
+          this.state.img.push({key:imagenumber,image:result.uri});
           
-          //console.log(this.state.image);
-          this.state.img.push(a[c]);
-          //console.log(this.state.img)
-          console.log(this.state.task1)
-          console.log(b)
-          if(b == 1)
-          {
-            this.setState({ image1:result.uri});
-            //this.setState({ task1:1});
-            this.imagephoto1();
-          }
-          else if(b == 2)
-          {
-            this.setState({ image2:result.uri});
-            this.setState({ task1:1});
-            this.imagephoto2();
-          }
-          else if(b == 3)
-          {
-            this.setState({ image3:result.uri});
-            this.setState({ task1:2});
-            this.imagephoto3();
-          }
+          console.log(this.state.img);
+
+        console.log(this.state.img)
+          this.imagephoto1(this.state.img);
+          this.forceUpdate();
+        }        
+      } 
+      catch (E) {
+      console.log(E);
+    }
+  };
+// API : 紀錄+img : Upload_Record.aspx  ==> return : record_ID
+//        mp4     : Mp4.aspx            ==> Set : record_ID 
+  imagephoto1 = (item) => {
+      //console.log(this.state.image1)
+      //console.log(this.state.task1)
+    return this.state.img.map((img) => {   
+      return (           
+        <View style ={styles.cameraview1} key={img.key}>
+          <Image style = {styles.camera_image} 
+                source={{uri:img.image}}/>  
+        </View>     
+      )
+     })
+    }
+
+    imagephoto2 = () => {
+    
+          //this.setState({ image1:"123"});
+            console.log(this.state.vid)
+            //console.log(this.state.task1)
+                return this.state.vid.map((vid) => {  
+            return (           
+              <View style ={styles.cameraview1} key={vid.key}>
+                <Video
+                source={{ uri:vid.vid}}
+                              rate={1.0}
+                              volume={1.0}
+                              isMuted={false}
+                              resizeMode="stretch"
+                              shouldPlay ={false}
+                              isLooping ={false}
+                              useNativeControls
+                style={ {width:'100%' , height:'100%'}}
+            /> 
+        </View>     
+      )
+     })
+    }
+
+      _pickImageLib = async () => {
+    try {
+      let result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        //allowsEditing: true,
+        //aspect: [4, 3],這是裁切
+        quality: 1,
+      });
+      if (!result.cancelled) {
+        imagenumber++;
+        this.state.img.push({key:imagenumber,image:result.uri});
+      }
+      this.forceUpdate();
+    } catch (E) {
+      console.log(E);
+    }
+  };
           //a[c] =result.uri;
           //console.log(a[c]);
           
@@ -136,18 +464,14 @@ export default class App extends React.Component {
         //global.GlobalVariable.tempphotouri = result.uri ;
         //this.props.navigation.navigate("MeasurePhotoConfirm");
 
-      }
+
 
       //console.log(this.state.image2);
       
       //console.log(b);
       //console.log(this.state.image2);
       
-      
-    } catch (E) {
-      console.log(E);
-    }
-  };
+
 
 
      
@@ -161,46 +485,7 @@ export default class App extends React.Component {
       this.state.image2.push(item[i])
       console.log(this.state.image2[0])
       }*///晚上先把轉圈圈的載入用132好在來測試
-      imagephoto1 = () => {
-        if(b >= 1)
-          {
-      //console.log(this.state.image1)
-      //console.log(this.state.task1)
-      return(
-          <View style ={styles.cameraview1}>
-          <Image style = {styles.camera_image}
-                source={{uri:this.state.image1}}/>  
-        </View>
-          )
-          }
-    }
-    imagephoto2 = () => {
-      if(b >= 2)
-          {
-      console.log(this.state.image1)
-      console.log(this.state.image2)
-      //console.log(this.state.task1)
-      return(
-          <View style ={styles.cameraview2}>
-          <Image style = {styles.camera_image}
-                source={{uri:this.state.image2}}/>  
-        </View>
-          )
-        }
-    }
-        imagephoto3 = () => {
-          if(b == 3)
-          {
-      //console.log(this.state.image3)
-      //console.log(this.state.task1)
-      return(
-          <View style ={styles.cameraview3}>
-          <Image style = {styles.camera_image}
-                source={{uri:this.state.image3}}/>  
-        </View>
-          )
-          }
-      }
+      
   
     /*<View style = {styles.cameraview1}>
               <FlatList 
@@ -217,57 +502,103 @@ export default class App extends React.Component {
               }
                 
               />
-              </View> 
-   uploadImageAsync = (rest)  =>{
-    let apiUrl = 'https://observerplus.club/API/upImg.aspx';
-      let data = new FormData();  
-      data.append("file",{  
-        uri:rest,
-        name:"file",
-        type:"image/jpg",
-        
-      })
-      fetch(apiUrl, {  
-        headers: {
-          //'Accept': 'application/json',
-          //'Content-Type': 'multipart/form-data'
-        },
-        method: 'POST',
-        body: data
-      }).then(
-        response => {
-          console.log('succ ')
-          console.log(response.json())
-          this.props.navigation.navigate("Measure");
+              </View> */
+
+
+    // function to take snap || click photo
+    snap = async () => {
+        if (this.camera) {
+            let photo = await this.camera.takePictureAsync();
+            console.log(photo);
         }
-        ).catch(err => {
-        console.log('err ')
-        console.log(err)
-      } )
-      .done(); 
-    }*/
+    };
 
-
-  _pickImageLib = async () => {
-    try {
-      let result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ImagePicker.MediaTypeOptions.Images,
-        //allowsEditing: true,
-        //aspect: [4, 3],這是裁切
-        quality: 1,
-      });
-      if (!result.cancelled) {
-        this.setState({ image: result.uri });
-
-        global.GlobalVariable.tempphotouri = result.uri ;
-        this.props.navigation.navigate("MeasurePhotoConfirm");
-      }
-
-      console.log(result);
-    } catch (E) {
-      console.log(E);
+    _StartRecord = async () => {
+        console.log("video record started")
+        if (this.camera) {
+            this.setState({ recording: true }, async () => {
+                const video = await this.camera.recordAsync();
+                videonumber++;
+                  this.state.vid.push({key:videonumber,vid:video.uri});
+                //this.setState({ vid:video.uri });
+                console.log(this.state.vid)
+                this.forceUpdate();
+            });
+        }
     }
-  };
+
+    _StopRecord = async () => {
+        this.setState({ recording: false }, () => {
+            this.camera.stopRecording();
+            console.log("star");
+            console.log(this.state.vid);
+            
+            this.setState({video2:true})
+
+        });
+    };
+
+
+    toogleRecord = () => {
+        const { recording } = this.state;
+        if (recording) {
+            this._StopRecord();
+        } else {
+            this._StartRecord();
+        }
+    };
+
+    Plant_or_Animal = () =>{
+      if(this.state.obj_token == "True"){
+        return(
+        <View style ={styles.background}>
+          <View style = {styles.ruler_B}>
+            <Image style = {styles.ruler}
+              source={require("../../images/Re_ruler.png")}/>
+          </View>
+
+          <View style = {styles.water_B}>
+            <Image style = {styles.water}
+              source={require("../../images/Re_water.png")}/>
+          </View>
+        
+
+        <TextInput style = {styles.inputBox} underlineColorAndroid= 'rgba(0,0,0,0)' 
+                     placeholder = "公分"
+                     placeholderTextColor = "#ADADAD"
+                     onChangeText={(rulur) => this.setState({rulur})}
+                     value={this.state.rulur}//寫入state           
+                    />
+        <TextInput style = {styles.inputBox2} underlineColorAndroid= 'rgba(0,0,0,0)' 
+                     placeholder = "毫升"
+                     placeholderTextColor = "#ADADAD"
+                     onChangeText={(water) => this.setState({water})}
+                     value={this.state.water} //寫入state           
+                    />
+        </View>
+        )
+      }
+      else{
+        return(
+          <View style ={styles.background}>
+          <View style = {styles.ruler_B2}>
+            <Image style = {styles.ruler}
+            source={require("../../images/Re_ruler.png")}/>
+          </View>
+
+          <TextInput style = {styles.inputBox3} underlineColorAndroid= 'rgba(0,0,0,0)' 
+                     placeholder = "公分"
+                     placeholderTextColor = "#ADADAD"
+                     onChangeText={(rulur) => this.setState({rulur})}
+                     value={this.state.rulur}//寫入state           
+                    />
+          </View>
+        )
+      }
+    }
+
+
+
 //source={uri?{uri: uri }:null}/>
   render() { 
     let { image } = this.state;
@@ -278,7 +609,7 @@ export default class App extends React.Component {
           </View>
         )
       }
-  else{
+  else if(this.state.isLoading == false && this.state.video2){
     return (
     <ImageBackground source={require('../../images/Re_background.png')} style = {styles.background}>
    
@@ -292,52 +623,38 @@ export default class App extends React.Component {
 
         <View style ={styles.center}>
         <View style ={styles.dateview}>
-        <Text style ={styles.date}>2020/09/16</Text>
+        <Text style ={styles.date}>{(this.state.currentDay.getMonth()+1)+"/"+this.state.currentDay.getDate()} </Text>
         </View>
         <View style ={styles.inputview}>
         <TextInput style = {styles.inputtext} underlineColorAndroid= 'rgba(0,0,0,0)' 
                      placeholder = "在想什麼呢?"
                      placeholderTextColor = "#ADADAD"
-                     onChangeText={(user_text) => this.setState({user_text})} //寫入state           
+                     onChangeText={(feelings) => this.setState({feelings})} 
+                     value={this.state.feelings}//寫入state           
                     />
         </View>
         </View>
         <View style ={styles.center2}>
-        <ScrollView>
+        <ScrollView>  
+        <Text style ={(styles.Title)}>照片:</Text>
         {this.imagephoto1()}
+        <Text style ={(styles.Title)}>影片:</Text>
         {this.imagephoto2()}
-        {this.imagephoto3()}
-        </ScrollView>
+        </ScrollView>  
         </View>
-        <TouchableOpacity style = {styles.sendbutton}  onPress={()=>alert('尚未成功')}>
+        <TouchableOpacity style = {styles.sendbutton}  onPress={this.Check}>
         <Text style = {styles.SB_text}>發布</Text>
      </TouchableOpacity>
-      <TextInput style = {styles.inputBox} underlineColorAndroid= 'rgba(0,0,0,0)' 
-                     placeholder = "公分"
-                     placeholderTextColor = "#ADADAD"
-                     onChangeText={(user_text) => this.setState({user_text})} //寫入state           
-                    />
-      <TextInput style = {styles.inputBox2} underlineColorAndroid= 'rgba(0,0,0,0)' 
-                     placeholder = "毫升"
-                     placeholderTextColor = "#ADADAD"
-                     onChangeText={(user_text) => this.setState({user_text})} //寫入state           
-                    />
-      <View style = {styles.ruler_B}>
-      <Image style = {styles.ruler}
-          source={require("../../images/Re_ruler.png")}/>
-     </View>
-
-    <View style = {styles.water_B}>
-      <Image style = {styles.water}
-          source={require("../../images/Re_water.png")}/>
-     </View>
+      <View style ={styles.PorA}>
+      {this.Plant_or_Animal()}
+      </View>
 
       <TouchableOpacity style = {styles.camera_B} onPress={this._pickImage}>
       <Image style = {styles.camera}
           source={require("../../images/Re_camera.png")}/>
      </TouchableOpacity>
      
-      <TouchableOpacity style = {styles.video_B}  onPress={()=>{ this.props.navigation.navigate("MeasureRecord");}}>
+      <TouchableOpacity style = {styles.video_B}  onPress={()=>{this.setState({video2 :false})}}>
         <Image style={styles.video2}
           source={require("../../images/Re_video.png")}/>
      </TouchableOpacity>
@@ -350,6 +667,58 @@ export default class App extends React.Component {
     </ImageBackground> 
       );  
     }  
+    else if (this.state.video2 == false)
+    {
+      const { hasCameraPermission } = this.state;
+      if (hasCameraPermission === null) {
+            return <View />;
+        } else if (hasCameraPermission === false) {
+            return <Text>No access to camera</Text>;
+        }
+      return (
+                <View style={{ flex: 1 }}>
+                    <Camera
+                        style={{ flex: 1 }}
+                        type={this.state.type}
+                        ref={ref => {
+                            this.camera = ref;
+                        }}
+                    >
+                        <View
+                            style={{
+                                flex: 1,
+                                backgroundColor: 'transparent',
+                                flexDirection: 'row',
+                                justifyContent: 'space-evenly',
+                                position: 'absolute',
+                                left: 10,
+                                bottom: 2,
+                                right: 10
+                            }}>
+
+                            <TouchableOpacity
+                                onPress={() => {
+                                    this.setState({
+                                        type:
+                                            this.state.type === Camera.Constants.Type.back
+                                                ? Camera.Constants.Type.front
+                                                : Camera.Constants.Type.back,
+                                    });
+                                }}>
+                                <Ionicons name="ios-reverse-camera" size={70} color="white" />
+                            </TouchableOpacity>
+
+                            <TouchableOpacity
+                                onPress={() => { this.toogleRecord() }}
+                            >
+                                <Ionicons name="ios-radio-button-on" size={70} color={this.state.recording ? "white" : "red"} />
+                            </TouchableOpacity>
+                        </View>
+                    </Camera>
+                </View>
+                
+            );
+    }
   }
 } 
 
@@ -536,21 +905,35 @@ const styles = StyleSheet.create({
         borderRadius:15,
         },
         ruler_B:{
-        top:'74%',
-        left:"5%",
-        width: "19.57%",  
-        height: "11.8%",
+        left:"2%",
+        width: "18.5%",  
+        height: "100%",
+        backgroundColor:'#333',
+        position: 'absolute',
+        borderRadius:100,
+        },
+        ruler_B2:{
+        left:"25%",
+        width: "18.5%",  
+        height: "100%",
         backgroundColor:'#333',
         position: 'absolute',
         borderRadius:100,
         },
         water_B:{
-        top:'74%',
-        left:"51%",
-        width: "19.57%",  
-        height: "11.8%",
+        left:"52%",
+        width: "18.5%",  
+        height: "100%",
         position: 'absolute',
         borderRadius:100,
+        },
+        PorA:{
+          top:'75%',
+          height:'10%',
+          width:'90%',
+          left:'5%',
+          position: 'absolute',
+          //backgroundColor:'#333',
         },
     backbutton: {
     resizeMode:'stretch',
@@ -618,10 +1001,10 @@ const styles = StyleSheet.create({
     },
    
     inputBox:{
-        top:'76.5%',
-        height:'7%',
+        //top:'76.5%',
+        height:'75%',
         width:'22%',
-        left:'26%',
+        left:'25%',
         position: 'absolute',
         backgroundColor:'#FFFFFF',
         textAlign: 'center',
@@ -631,10 +1014,10 @@ const styles = StyleSheet.create({
         borderWidth: 1,
     },
     inputBox2:{
-        top:'76.5%',
-        height:'7%',
+        //top:'76.5%',
+        height:'75%',
         width:'22%',
-        left:'72%',
+        left:'75%',
         position: 'absolute',
         backgroundColor:'#FFFFFF',
         textAlign: 'center',
@@ -643,4 +1026,23 @@ const styles = StyleSheet.create({
         fontSize:25,
         borderWidth: 1,
     },
+    inputBox3:{
+        //top:'76.5%',
+        height:'75%',
+        width:'22%',
+        left:'50%',
+        position: 'absolute',
+        backgroundColor:'#FFFFFF',
+        textAlign: 'center',
+        borderColor: "#000000",
+        borderRadius: 10, 
+        fontSize:25,
+        borderWidth: 1,
+    },
+    Title:{  
+    fontSize: 25,
+    //marginVertical:'5%',
+    justifyContent: 'center',
+    marginHorizontal:'5%',
+  },
 });  

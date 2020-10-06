@@ -9,27 +9,24 @@ export default class Form extends Component{
         {
         super(props);
 
-        this.state = {user_txt: '',pass_txt: ''};
-        this.state = {somedata: ''};
+        this.state = {user_txt: 'asd',pass_txt: 'asd'};
+        this.state = {menu: ''};
         this.state = {
-          isLoading:false,
+        isLoading:false,
         }
         
         }
     onButtonPress ()  
     {
         this.state.isLoading = true;
-        this.forceUpdate()
         //Alert.alert('測試','帳號為：'+this.state.user_text+'，密碼為：'+this.state.pass_text)
-
-
         var queryURL = 'https://observerplus.club/API/login.aspx';
         let parameters = new FormData();
         parameters.append("account", this.state.user_text);
         parameters.append("password", this.state.pass_text);
         global.GlobalVariable.account = this.state.user_text;
         global.GlobalVariable.password = this.state.pass_text;
-        
+        this.forceUpdate();
 
 
   fetch(queryURL,{
@@ -44,20 +41,18 @@ export default class Form extends Component{
         // 接到 Data
         console.log(responseData);
         
-            if(responseData.result == "Successful")
+            if(responseData.result == true)
         {
-          this.state = {
-            somedata: responseData.somedata
-          }
-          
-
-          this.props.navigation.replace("Main");
+          console.log("123");
+          this.setState({menu:responseData})
+          global.GlobalVariable.main = this.state.menu;
+          this.props.navigation.replace("Main",this.state.menu);
         }
         else
         {
           Alert.alert('錯誤!','帳號或密碼錯誤!')
           this.state.isLoading = false;
-         this.forceUpdate()
+          this.forceUpdate();
         }
       } 
     })

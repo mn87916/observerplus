@@ -1,0 +1,148 @@
+
+				#mySidebar{
+				width: 400px; 
+				height:100%; 
+				position:fixed;
+				z-index:20; 
+				background:#151719;
+				background-color: #fbfadf;
+				left:-400px;
+				box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+				transition: all 180ms linear;
+				
+				}
+				#mySidebar li {
+					list-style:none;
+					padding:15px 10px;
+					border-bottom: 1px solid rgba(100,100,100,0.3);
+					text-align: center;
+					font-size: 20px;
+				}
+				#mySidebar.active{
+				left:0px
+				}
+				#mySidebar .toggle-btn{
+				position:absolute;
+				left:400px;
+				background-color: #5d9b84;
+				box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+				border-radius: 0px 5px 5px 0px;
+				top:20px;
+				}
+				#mySidebar .toggle-btn span{
+				display:block;
+				width:45px;
+				height:5px;
+				background:#151719;
+				margin:8px 0px;
+				}
+				
+				
+				.tabs {
+				border-radius: 8px;
+				overflow: hidden;
+				box-shadow: 0 4px 4px -2px rgba(0, 0, 0, 0.5);
+				margin-bottom:10px;
+				}
+ 
+				.tab {
+				width: 100%;
+				color: white;
+				overflow: hidden;
+				}
+				.filter{
+					
+				}
+				
+				.tabdivs{
+					margin:5px;
+				}
+.tab-label {
+  display: -webkit-box;
+  display: flex;
+  -webkit-box-pack: justify;
+  justify-content: space-between;
+  padding: 1em;
+  background: #5d9b84;
+  cursor: pointer;
+  /* Icon */
+}
+.tab-label:hover {
+  background: #faa45b;
+}
+.tab-label::after {
+  content: "\276F";
+  width: 1em;
+  height: 1em;
+  text-align: center;
+  -webkit-transition: all .35s;
+  transition: all .35s;
+  
+}
+
+.tab-content {
+  max-height: 0;
+  padding: 0 1em;
+  color: #2c3e50;
+  background: white;
+  -webkit-transition: all .35s;
+  transition: all .35s;
+}
+
+input:checked + .tab-label {
+   background: #faa45b;
+}
+input:checked + .tab-label::after {
+  -webkit-transform: rotate(90deg);
+          transform: rotate(90deg);
+}
+input:checked ~ .tab-content {
+  max-height: 100vh;
+  padding: 1em;
+}
+
+
+#chck1 {
+  position: absolute;
+  opacity: 0;
+  z-index: -1;
+}
+#chck2 {
+  position: absolute;
+  opacity: 0;
+  z-index: -1;
+}
+#chck3 {
+  position: absolute;
+  opacity: 0;
+  z-index: -1;
+}
+.blurcontainer#blur.active{
+	
+	filter: blur(10px);
+	pointer-events: none;
+	user-select:none;
+}
+#popupdetail{
+	z-index:20; 
+	top: 40%;
+	Left:50%;
+	width:600px;
+	position:fixed;
+	transform :translate(-50%,-50%);
+	padding: 50px;
+	box-shadow:0 5px 30px rgba(0,0,0,.30);
+	background:#151719;
+	background-color: #fbfadf;
+	visibility: hidden;
+	transition:0.5s:
+}
+#popupdetail.active{
+	visibility:visible;
+	opacity:1;
+	transition:0.5s;
+}
+
+
+
+

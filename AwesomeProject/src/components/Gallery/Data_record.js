@@ -16,6 +16,7 @@ export default class Data_record extends React.Component {
       visible:true,
       isLoading:true,
 			Data_record:"",
+      rcd_ID:"",
       img:[],
       vid:[],
 	            }
@@ -24,53 +25,14 @@ export default class Data_record extends React.Component {
 
 componentDidMount()
   {
-	  /*console.log(this.props.navigation.getParam("ID"));
-      var queryURL = 'http://observerplus.club/API/asd.aspx';
-      let parameters = new FormData();
-        parameters.append("myID","1");
-console.log(parameters)
-      fetch(queryURL,{
-        method: 'POST',
-        body: parameters   
-            })
-    // response.json() => 把 response 的資料轉成 json
-    // 如果你想要原封不動的接到 response 的資料，可以用 response.text()
-
-    /*.then((response) => response.json())
-    .then((responseData) =>  { 
-      console.log("123")
-      for (var i = 0 ; i < responseData.length;i++) {
-       this.state.Data_record.push(responseData[i])   	   
-      }
-	  console.log(responseData)
-    /*.then(response => {
-console.log(JSON.stringify(response, null, 4))
-return response.json()
-})
-    .then(
-      response => {
-        console.log('succ ')
-        console.log(response)*/
-      
-      /*for (var i = 0 ; i < this.state.Gallery[i].Img.length;i++) {
-       this.state.img.push(this.state.Gallery.Img[])       
-      }*/
-      //this.forceUpdate()
-      //this.setState({isLoading:false})
-    /*})
-    .catch((error) => {
-      console.warn(error);
-    })
-    .done();*/
-
-
-
-
-
-        var queryURL = 'https://observerplus.club/API/test2.aspx';
-        let parameters = new FormData();
-        parameters.append("ID",this.props.navigation.getParam("ID"));
-        console.log(parameters);
+    this.state.rcd_ID = this.props.navigation.getParam("rcd_ID");
+    this.forceUpdate();
+    var queryURL = 'https://observerplus.club/API/Single_Record.aspx';
+    let parameters = new FormData();
+    parameters.append("account", global.GlobalVariable.account);
+    parameters.append("password", global.GlobalVariable.password);  
+    parameters.append("rcd_ID", this.state.rcd_ID); 
+    console.log(parameters);
         
 
 
@@ -100,15 +62,15 @@ return response.json()
     {
     console.log(item)
     for (var i = 0 ; i < item.length;i++) {
-      this.state.img.push(item[i])
+      this.state.img.push({key:i,image:item[i]})
       console.log(this.state.img)
       }
     
     return this.state.img.map((img) => {  
       return (           
-        <View style={Gallery.RecordBox}>       
+        <View style={Gallery.RecordBox} key ={img.key}>       
         <Image style={Gallery.Photos2}
-          source={{uri:img}}/>       
+          source={{uri:img.image}}/>       
         </View>
         
       )
@@ -119,13 +81,13 @@ return response.json()
       Vid = (item) => { 
     console.log(item[1])
     for (var i = 0 ; i < item.length;i++) {
-      this.state.vid.push(item[i])
+      this.state.vid.push({key:i,image:item[i]})
       console.log(this.state.vid)
       }
     return this.state.vid.map((vid) => {  
       return (           
         
-        <View style ={(Gallery.RecordBox)}>   
+        <View style ={(Gallery.RecordBox)} key ={vid.key}>   
         <Video
               source={{ uri:vid}}
                             rate={1.0}
@@ -181,9 +143,9 @@ return response.json()
       <Text style ={(Gallery.Rec)}>{this.state.Data_record.Date}</Text>
       <Text style ={(Gallery.Rec)}>{this.state.Data_record.rec}</Text>
       <Text style ={(Gallery.Title)}>照片:</Text>
-      {this.Img(this.state.Data_record.Img)}
+      {this.Img(this.state.Data_record.IMG)}
       <Text style ={(Gallery.Title)}>影片:</Text>
-      {this.Vid(this.state.Data_record.Mp4)}
+      {this.Vid(this.state.Data_record.MP4)}
       </ScrollView>
       </View>      
       
@@ -210,5 +172,6 @@ const styles = StyleSheet.create({
 		alignItems: 'center',
 		justifyContent: 'center',
 		backgroundColor: "rgba(0, 0, 0, 0.5)",
-	}
+	},
+  
 });

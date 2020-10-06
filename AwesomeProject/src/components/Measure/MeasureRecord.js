@@ -1,186 +1,199 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { Text, View, TouchableOpacity } from 'react-native';
+import React from 'react';
+import { Dimensions, Text, View, StyleSheet, TouchableOpacity, Alert, Button } from 'react-native';
+import * as Permissions from 'expo-permissions';
 import { Camera } from 'expo-camera';
+import * as MediaLibrary from 'expo-media-library';
+import { Video } from 'expo-av';
 import { Ionicons } from '@expo/vector-icons';
-import { Audio } from 'expo-av';
+import Indicator from './Indicator';
 
-export default function MeasureRecord() {
-  const [hasPermission, setHasPermission] = useState(null);
-  const [cameraRef, setCameraRef] = useState(null)
-  const [type, setType] = useState(Camera.Constants.Type.back);
-  const [recording, setRecording] = useState(false)
-  
-  
+class MyReview extends React.Component {
+    state = {
+        RetakeVideo: false,
+        loading: false
+    }
+
+    askPermissionsAsync = async () => {
+        await Permissions.askAsync(Permissions.CAMERA);
+        await Permissions.askAsync(Permissions.CAMERA_ROLL);
+
+    };
+
+    _saveVideo = async () => {
+
+        this.setState({ loading: true });
+
+        await this.askPermissionsAsync();
+
+        const { video } = this.props;
+        console.log("----> save" + video.uri)
+        const asset = await MediaLibrary.createAssetAsync(video.uri);
+        this.setState({ loading: false })
+    }
 
 
-useEffect(() => {
-    (async () => {
-      const { status } = await Camera.requestPermissionsAsync();
-      Audio.requestPermissionsAsync()
-      setHasPermission(status === 'granted');
-    })();
-  }, []);
+    render() {
 
-  const uploadImageAsync = (pictureuri)  =>{
-   let apiUrl = 'https://observerplus.club/API/img.aspx';
-    var data = new FormData();  
-    data.append('file',{  
-      uri:pictureuri,
-      name:'file',
-      type:'image/jpg',
-    })
-    
+        const { width, height } = Dimensions.get('window');
 
-    fetch(apiUrl, {  
-      headers: {
-        //'Accept': 'application/json',
-        //'Content-Type': 'multipart/form-data'
-      },
-      method: 'POST',
-      body: data
-    }).then(
-      response => {
-        console.log('succ ')
-        console.log(response)
-      }
-      ).catch(err => {
-      console.log('err ')
-      console.log(err)
-    } )
-  }
-
-  const uploadVideo = (videouri)  => {
-  let apiUrl = 'https://observerplus.club/API/mp4.aspx';
-    var data = new FormData();  
-    data.append('file', {  
-      uri: videouri,
-      name: 'file',
-      type: 'video/${codec}'
-    })
-
-    fetch(apiUrl, {  
-      headers: {
-        //'Accept': 'application/json',
-        //'Content-Type': 'multipart/form-data'
-      },
-      method: 'POST',
-      body: data
-    }).then(
-      response => {
-        console.log('succ ')
-        console.log(response.json())
-        
-      }
-      ).catch(err => {
-      console.log('err ')
-      console.log(err)
-    } )
-  }
-
-if (hasPermission === null) {
-    return <View />;
-  }
-  if (hasPermission === false) {
-    return <Text>No access to camera</Text>;
-  }
-  return (
-    <View style={{ flex: 1 }}>
-      <Camera style={{ flex: 1 }} type={type} ref={ref => {
-        setCameraRef(ref) ;
-  }}>
-        <View
-          style={{
-            flex: 1,
-            backgroundColor: 'transparent',
-            justifyContent: 'flex-end'
-          }}>
-            <View style={{
-              display: 'flex',
-              flexDirection: 'row',
-              justifyContent: 'space-evenly'
-            }}>
-            <TouchableOpacity
-            style={{
-              flex: 0.1,
-              alignSelf: 'flex-end'
-            }}
-            onPress={() => {
-              setType(
-                type === Camera.Constants.Type.back
-                  ? Camera.Constants.Type.front
-                  : Camera.Constants.Type.back
-              );
-            }}>
-            <Ionicons name={ Platform.OS === 'ios' ? "ios-reverse-camera" : 'md-reverse-camera'} size={40} color="white" />
-            
-          </TouchableOpacity>
-          <TouchableOpacity style={{alignSelf: 'center'}} onPress={async() => {
-            if(cameraRef){
-              let photo = await cameraRef.takePictureAsync();
-              console.log('photo', photo.uri);
-              uploadImageAsync(photo.uri);
-            }
-          }}>
-            <View style={{ 
-               borderWidth: 2,
-              borderRadius:50,
-               borderColor: 'white',
-               height: 50,
-               width:50,
-               display: 'flex',
-               justifyContent: 'center',
-               alignItems: 'center'}}
-            >
-              <View style={{
-                 borderWidth: 2,
-                borderRadius:50,
-                 borderColor: 'white',
-                 height: 40,
-                 width:40,
-                 backgroundColor: 'white'}} >
-              </View>
+        if (this.state.RetakeVideo) {
+            return (
+                <TryVideoRecord />
+            )
+        }
+        if (this.state.saving) {
+            return <Indicator />
+        }
+        return (
+            <View>
+                <Video
+                    source={{
+                        uri: this.props.video.uri
+                    }}
+                    shouldPlay={true}
+                    resizeMode="cover"
+                    isLooping
+                    style={{ width: width - 40, height: height - 80, marginTop: 20, borderRadius: 10, marginLeft: 20 }}
+                    isMuted={true}
+                />
+                <Text style={{ left: 30, position: 'absolute', top: 30, backgroundColor: 'rgba(255, 255, 255, 0.8)', borderRadius: 10, paddingHorizontal: 5 }}>Preview</Text>
+                <View style={{ flex: 1, flexDirection: 'row', marginHorizontal: 20, justifyContent: 'space-between', bottom: 10, left: 10, right: 10, position: 'absolute', alignItems: 'center' }}>
+                    <Button title="Save" style={{}} onPress={() => { this._saveVideo() }} />
+                    <Button title="Retake" onPress={() => { this.setState({ RetakeVideo: true }) }} />
+                </View>
+                {this.state.loading &&
+                    <View style={styles.loading}>
+                        <Indicator />
+                    </View>
+                }
             </View>
-          </TouchableOpacity>
-          <TouchableOpacity 
-            style={{alignSelf: 'center'}} 
-            onPress={async() => {
-              if(!recording){
-                setRecording(true)
-              let video = await cameraRef.recordAsync();
-              console.log('video', video.uri);
-              uploadVideo(video.uri);
-              
-              
-            } else {
-                setRecording(false)
-                cameraRef.stopRecording()
-            }
-           }}>
-            <View style={{ 
-               borderWidth: 2,
-               borderRadius: 50,
-               borderColor: 'red',
-               height: 50,
-               width:50,
-               display: 'flex',
-               justifyContent: 'center',
-               alignItems: 'center'}}
-            >
-              <View style={{
-                 borderWidth: 2,
-                borderRadius: 50,
-                 borderColor: recording ? "blue":'red',
-                 height: 40,
-                 width:40,
-                 backgroundColor: recording ? "blue":'red'}} >
-              </View>
-            </View>
-          </TouchableOpacity>
-           
-          
-            </View>
-        </View>
-      </Camera>
-    </View>
-  );
+        )
+    }
+
 }
+
+
+export default class TryVideoRecord extends React.Component {
+    state = {
+        hasCameraPermission: null,
+        video: null,
+        type: Camera.Constants.Type.back,
+        recording: false,
+        ReviewVideo: false
+    };
+
+    async componentDidMount() {
+        const { status } = await Permissions.askAsync(Permissions.CAMERA);
+        this.setState({ hasCameraPermission: status === 'granted' });
+    }
+
+    // function to take snap || click photo
+    snap = async () => {
+        if (this.camera) {
+            let photo = await this.camera.takePictureAsync();
+            console.log(photo);
+        }
+    };
+
+    _StartRecord = async () => {
+        console.log("video record started")
+        if (this.camera) {
+            this.setState({ recording: true }, async () => {
+                const video = await this.camera.recordAsync();
+                this.setState({ video });
+                console.log(video)
+            });
+        }
+    }
+
+    _StopRecord = async () => {
+        this.setState({ recording: false }, () => {
+            this.camera.stopRecording();
+        });
+    };
+
+
+    toogleRecord = () => {
+        const { recording } = this.state;
+
+        if (recording) {
+            this._StopRecord();
+        } else {
+            this._StartRecord();
+        }
+    };
+
+
+    render() {
+        const { hasCameraPermission } = this.state;
+        if (hasCameraPermission === null) {
+            return <View />;
+        } else if (hasCameraPermission === false) {
+            return <Text>No access to camera</Text>;
+        } else if (this.state.video) {
+            return (
+                <MyReview video={this.state.video} />
+            )
+        }
+
+
+        else {
+            return (
+                <View style={{ flex: 1 }}>
+                    <Camera
+                        style={{ flex: 1 }}
+                        type={this.state.type}
+                        ref={ref => {
+                            this.camera = ref;
+                        }}
+                    >
+                        <View
+                            style={{
+                                flex: 1,
+                                backgroundColor: 'transparent',
+                                flexDirection: 'row',
+                                justifyContent: 'space-evenly',
+                                position: 'absolute',
+                                left: 10,
+                                bottom: 2,
+                                right: 10
+                            }}>
+
+                            <TouchableOpacity
+                                onPress={() => {
+                                    this.setState({
+                                        type:
+                                            this.state.type === Camera.Constants.Type.back
+                                                ? Camera.Constants.Type.front
+                                                : Camera.Constants.Type.back,
+                                    });
+                                }}>
+                                <Ionicons name="ios-reverse-camera" size={70} color="white" />
+                            </TouchableOpacity>
+
+                            <TouchableOpacity
+                                onPress={() => { this.toogleRecord() }}
+                            >
+                                <Ionicons name="ios-radio-button-on" size={70} color={this.state.recording ? "white" : "red"} />
+                            </TouchableOpacity>
+                        </View>
+
+                    </Camera>
+                </View>
+            );
+        }
+    }
+}
+
+const styles = StyleSheet.create({
+    loading: {
+        position: 'absolute',
+        left: 0,
+        right: 0,
+        top: 0,
+        bottom: 0,
+        alignItems: 'center',
+        justifyContent: 'center',
+        width: '100%'
+    }
+})
