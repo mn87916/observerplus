@@ -152,8 +152,6 @@ export const Globalstyles = StyleSheet.create({
     //backgroundSize:"50%",
   },
     Background: {
-        width:'100%',
-        height:'100%',
         flex: 1,
         justifyContent: "center",
         resizeMode:'stretch',

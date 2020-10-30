@@ -120,13 +120,28 @@ export default class ExamC extends React.Component {
   Next()
   {
       let Dailey_Exam_ID = this.props.navigation.getParam('Dailey_Exam_ID');
-      this.props.navigation.navigate("Task",{"Dailey_Exam_ID":Dailey_Exam_ID})
+      let Examount1 = this.props.navigation.getParam('Examount1');
+      let Examount2 = this.props.navigation.getParam('Examount2');
+      if(this.state.content == true){
+        this.props.navigation.navigate("Menu2")
+        }
   }
   Back()
   {
       let Dailey_Exam_ID = this.props.navigation.getParam('Dailey_Exam_ID');
       let mis_ID = this.props.navigation.getParam('mis_ID');
-      this.props.navigation.navigate("ExamB",{"Dailey_Exam_ID":Dailey_Exam_ID,"mis_ID":mis_ID})
+      let Examount1 = this.props.navigation.getParam('Examount1');
+      let Examount2 = this.props.navigation.getParam('Examount2');
+      if(Examount1 == true && Examount2 == true){
+        this.props.navigation.navigate("Task")
+      }
+      else if(Examount2 == true){
+        this.props.navigation.navigate("ExamA",{"Dailey_Exam_ID":Dailey_Exam_ID,"mis_ID":mis_ID,})
+      }
+      else{
+        this.props.navigation.navigate("ExamB",{"Dailey_Exam_ID":Dailey_Exam_ID,"mis_ID":mis_ID})
+      }
+
   }
   Answer = (index) =>
   {
@@ -209,7 +224,15 @@ export default class ExamC extends React.Component {
           </View>
           </ImageBackground>
         )
-      }
+      }/*          <TouchableOpacity onPress ={() => this.Back()} style = {ExamStyles.Lback}>
+            <Image source={require('../../images/retune.png')} style = {ExamStyles.imagesize}>
+            </Image>
+          </TouchableOpacity>   
+          <TouchableOpacity onPress ={() => this.Next()} style = {ExamStyles.Rback}>
+            <Image source={require('../../images/retune.png')} style = {ExamStyles.imagesize}>
+            </Image>
+          </TouchableOpacity>              
+          */
       else{
         return(
           <ImageBackground source={require('../../images/exambackground.png')} style = {(ExamStyles.container)}>   
@@ -229,14 +252,6 @@ export default class ExamC extends React.Component {
             <TouchableOpacity onPress= {() =>this.task4_change()} style ={(ExamStyles.textbox4)}>
             <Text style ={(ExamStyles.numberN)}>{"D:"+(this.state.task3.option4)} </Text> 
           </TouchableOpacity>
-          <TouchableOpacity onPress ={() => this.Back()} style = {ExamStyles.Lback}>
-            <Image source={require('../../images/retune.png')} style = {ExamStyles.imagesize}>
-            </Image>
-          </TouchableOpacity>   
-          <TouchableOpacity onPress ={() => this.Next()} style = {ExamStyles.Rback}>
-            <Image source={require('../../images/retune.png')} style = {ExamStyles.imagesize}>
-            </Image>
-          </TouchableOpacity>    
         </ImageBackground>
       )
     }

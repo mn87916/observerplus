@@ -12,14 +12,16 @@ export default class App extends React.Component {
 
   onSearchPress(){
     this.state.searchresult= [];
+    //Alert.alert(this.state.search_text);
     this.webref.injectJavaScript(`searchmarker('`+ this.state.search_text+`')`);
   }
 
   constructor(props) {
+    
     super(props);
 
     this.state = {
-      search_text:null,
+      search_text:'',
       searchresult:[],
       isLoading:true,
     };
@@ -88,12 +90,12 @@ export default class App extends React.Component {
               for(var i = 0 ; i < message.payload.result.length ; i++){
                 this.state.searchresult.push({key:message.payload.result[i]});
               }
-              //console.log(message.payload.result);
+              console.log(message.payload.result);
             }
             else if(message.command === 'doneloading'){   //地圖讀取完畢
               this.state.search_text = global.GlobalVariable.searchtext;
-              this.onSearchPress();
               this.state.isLoading = false;
+              this.onSearchPress();
             }
             
             if(this.state.content == false){

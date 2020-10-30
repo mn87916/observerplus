@@ -1,5 +1,5 @@
 import React, {Component} from 'react'; 
-import {Platform, StyleSheet, Text, View,TouchableOpacity,Image,Dimensions,Alert,ActivityIndicator,ImageBackground} from 'react-native';
+import {Platform,ScrollView, StyleSheet, Text, View,TouchableOpacity,Image,Dimensions,Alert,ActivityIndicator,ImageBackground} from 'react-native';
 import {
   LineChart,
   BarChart,
@@ -84,23 +84,9 @@ export default class App extends React.Component{
     render(){
       if(this.state.isLoading){
         return(
-          
-          <ImageBackground source={require('../../images/Track_growth.png')} style = {Globalstyles.Background}>
-
+          <ImageBackground source = {require('../../images/login_background.png')} style = {styles.login_image}>
           <View style ={styles.background}>
-     <View style ={styles.upperspace}>
-        <TouchableOpacity style={styles.backbutton} onPress={()=>{ this.props.navigation.goBack();}}>
-          <Image style={styles.back}
-          source={require("../../images/retune.png")}/>
-          
-        </TouchableOpacity>
-        </View>
-
-
-
-          <View style ={styles.container}>
-          <ActivityIndicator size= 'large' color="#4d805e"/>
-          </View>
+          <ActivityIndicator size = {80} color="#4d805e"/>
           </View>
           </ImageBackground>
         )
@@ -110,25 +96,22 @@ export default class App extends React.Component{
 
 
         return(
-<ImageBackground source={require('../../images/Track_growth.png')} style = {Globalstyles.Background}>
-    <View style ={styles.background}>
-     <View style ={styles.upperspace}>
-        <TouchableOpacity style={styles.backbutton} onPress={()=>{ this.props.navigation.goBack();}}>
-          <Image style={styles.back}
+    <ImageBackground source={require('../../images/Track_growth.png')} style = {styles.background}>
+      <TouchableOpacity style={styles.backbutton} onPress={()=>{ this.props.navigation.goBack();}}>
+        <Image style={styles.back}
           source={require("../../images/retune.png")}/>
-          
-        </TouchableOpacity>
-        </View>
+      </TouchableOpacity>
   
     <View style = {styles.container3}>
       <Text style={styles.text}>植物紀錄</Text>
       </View>
 
   <View style = {styles.linechart}>
+  <ScrollView horizontal ={true}>
   <LineChart
     data={this.state.data}
-    width={Dimensions.get("window").width * 0.85} // from react-native
-    height={Dimensions.get("window").height * 0.8}
+    width={Dimensions.get("window").width * 1} // from react-native
+    height={Dimensions.get("window").height * 0.7}
     //yAxisLabel="$"
     yAxisSuffix="公分"
     svg={{fill: 'grey',}}
@@ -137,49 +120,41 @@ export default class App extends React.Component{
       backgroundColor: "#e26a00",
       backgroundGradientFrom: "#FBFADF",
       backgroundGradientTo: "#FBFADF",
-      decimalPlaces: 2, // optional, defaults to 2dp
+      decimalPlaces: 0, // optional, defaults to 2dp
       color: (opacity = 1) => `rgba(250, 164, 91, ${opacity})`,
       labelColor: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
       propsForDots: {
         r: "6",
         strokeWidth: "2",
         stroke: "#ffa726",
-        
       }
     }}
     bezier
     style={{
-      top:-80,
-      paddingTop:100,
-      paddingRight:80,
+      //top:10,
+      paddingTop:35,
+      //paddingRight:50,
       //marginVertical: 8,
-      borderRadius: 16,
     }}
   />
+  </ScrollView>
 </View>
-     <TouchableOpacity style = {styles.listbutton} onPress={()=>{ this.props.navigation.navigate("Recordtable",{"obj_ID":this.state.obj_ID});}}>
-                    
-                        
+     <TouchableOpacity style = {styles.listbutton} onPress={()=>{ this.props.navigation.navigate("Recordtable",{"obj_ID":this.state.obj_ID});}}>                        
        <Text style ={styles.buttonText}>顯示表格 > </Text>
      </TouchableOpacity>
-
-</View>
    </ImageBackground>
-
-
-        )
-
+      )
     }
-
-}
+  }
 }
 
 
 const styles = StyleSheet.create({ 
-    background: {
-        flex:1,
-        
-    },
+  background: {
+    alignItems:'center',
+    justifyContent:'center',
+    flex:1,
+  },
 
     upperspace:{
         width: '100%', 
@@ -188,33 +163,43 @@ const styles = StyleSheet.create({
     },
 
     backbutton: {
-        resizeMode:'stretch',
-        width: "10%", 
-        height: "90%",
-        left:'2%',
-        bottom:'0%' ,
-        position: 'absolute',
-    },
-
+    resizeMode:'stretch',
+    width: "8%", 
+    height: "7%",
+    left:'5%',
+    top:"6.5%",
+    //bottom:'0%' ,
+    position: 'absolute',
+    //backgroundColor:'#333',
+  },
     back: {
         width: "100%", 
         height: "100%",
         resizeMode:'stretch',
     },
+    login_image: {
+        width:'100%',
+        height:'100%',
+        flex: 1,
+        justifyContent: "center",
+      },
     linechart:{
+      width: "85%", 
+      height: "70%",
       alignItems:'center',
       //fontSize: 30,
-      top:'7%',
+      top:'17.5%',
       left:'7.5%',
       position: 'absolute',
+     // backgroundColor:'#333',
     },
      container3: {
       alignItems:'flex-start',
       //backgroundColor:'#333',
-      //width:'40%',
+      width:'40%',
       alignItems:'center',
-      top:'3.5%',
-      left:'10%',
+      top:'15%',
+      left:'15%',
       position: 'absolute',
     },
       text: {

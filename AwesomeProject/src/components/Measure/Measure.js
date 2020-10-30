@@ -11,6 +11,7 @@ import { Camera } from 'expo-camera';
 import Indicator from './Indicator';
 import { Ionicons } from '@expo/vector-icons';
 import * as Location from 'expo-location';
+import * as ImageManipulator from "expo-image-manipulator";
  
 export default class App extends React.Component {
   constructor(props) 
@@ -34,6 +35,7 @@ export default class App extends React.Component {
           obj_key:"",
           checkimage:false,
           checkvideo:false,
+          checksend:false,
           obj_token:true,
           NTPWeather:[],
           TPWeather:[],
@@ -50,7 +52,7 @@ export default class App extends React.Component {
 
 
    componentDidMount() {
-     console.log(this.state.currentDay.getHours())
+     //console.log(this.state.currentDay.getHours())
       global.imagenumber = 0;
       global.videonumber = 0;
       this.state.obj_token = this.props.navigation.getParam("obj_token");
@@ -58,7 +60,7 @@ export default class App extends React.Component {
       console.log(this.props.navigation.getParam("obj_token"))
      this.getPermissionAsync();
      this.setState({isLoading:false})
-     console.log(this.state.feelings)
+     console.log(this.state.obj_key)
      this._getLocation();
      this.forceUpdate();
      
@@ -92,8 +94,6 @@ export default class App extends React.Component {
      this.setState({location:place[0].region})
 
      //Alert.alert('測試',JSON.stringify(this.state.location))
-     console.log(this.state.location);
-     console.log(place[0].region);
      //console.log(location.coords.longitude);
      //console.log(location.coords.latitude);
      //this.state.currentlongitude = location.coords.longitude;
@@ -134,15 +134,24 @@ export default class App extends React.Component {
       .then((responseData) => { 
           if(responseData.Message){
             this.setState({rec_ID:responseData.rcd_ID})
+            this.forceUpdate();
+            console.log(this.state.rec_ID)
             if(this.state.checkimage == true){
               this.Sendimage();
             }
             if(this.state.checkvideo == true){
               this.Sendvideo();
             }
+            this.setState({checksend:true})
+            this.setState({feelings:""})
+            this.setState({rulur:""})
+            this.setState({water:""})
+            this.setState({img:[]})
+            this.setState({vid:[]})
+            alert("發布成功~")
           }
           else{
-            alert("今天已經記入過了~")
+            alert("發布失敗~")
           }
           console.log(responseData)
         }
@@ -158,10 +167,10 @@ export default class App extends React.Component {
        console.log(this.state.Sendimg2)
       let apiUrl = 'https://observerplus.club/API/Img.aspx';
       let parameters = new FormData();  
-      parameters.append("rcd_ID","14");
+      parameters.append("rcd_ID",this.state.rec_ID);
       for(var i =0;i<imagenumber;i++){
         parameters.append("file",{  
-        uri:this.state.img[i].image,
+        uri:this.state.img[i].image.uri,
         name:"file",
         type:"image/jpg",
         })
@@ -191,7 +200,7 @@ export default class App extends React.Component {
        
       let apiUrl = 'https://observerplus.club/API/Mp4.aspx';
       let parameters = new FormData();  
-      parameters.append("rcd_ID","16");
+      parameters.append("rcd_ID",this.state.rec_ID);
       for(var i =0;i<videonumber;i++){
         parameters.append("file2",{  
         uri:this.state.vid[i].vid,
@@ -239,24 +248,12 @@ export default class App extends React.Component {
         .then((responseData) =>  { 
           //要傳給+7的資料
           this.setState({getW_number:responseData.records.location[0].weatherElement[0].time[0].parameter.parameterValue}) 
-          console.log(this.state.getW_number)
+          //console.log(this.state.getW_number)
           var mint = parseInt(responseData.records.location[0].weatherElement[1].time[0].parameter.parameterName)
           var maxt = parseInt(responseData.records.location[0].weatherElement[2].time[0].parameter.parameterName)
-          var temp = (mint+maxt)/2
+          var temp = parseInt((mint+maxt)/2)
           this.setState({temp:temp})
-          console.log(this.state.temp)
-         if(responseData.records.location[0].weatherElement[0].time[0].parameter.parameterValue <=2)
-         {
-           console.log("123")
-         }
-         else if(responseData.records.location[0].weatherElement[0].time[0].parameter.parameterValue <= 5)
-         {
-           
-         }
-         /*晴天:1-2
-          多雲:3-5
-          陰天:6-7
-          雨天:>=8*/
+         console.log(this.state.temp)
          /* for (var i = 0 ; i < 3;i++) {
           this.state.NTPWeather.push({
               LocationName:responseData.records.location[0].locationName,
@@ -300,7 +297,8 @@ export default class App extends React.Component {
 
     Check = () => {
       this.forceUpdate();
-      if(this.state.obj_token){
+      if(this.state.checksend == false){
+       if(this.state.obj_token){
         if(this.checkNumber(this.state.rulur) ==false || this.checkNumber(this.state.water) ==false || this.state.feelings ==""){
           alert("請檢查測量長度、水和心得是否輸入正確資料^.^")
         }
@@ -320,65 +318,70 @@ export default class App extends React.Component {
           this.setState({checkimage:true})
           this.setState({checkvideo:true})
           this.SendPersonal();
+            }
+          }
+        }
+      else{
+          if(this.checkNumber(this.state.water) ==false || this.state.feelings ==""){
+            alert("請檢查測量長度和心得是否輸入資料")
+          }
+          else{
+            if(this.state.img.length == 0 && this.state.vid.length == 0){
+              alert("照片或影片至少要一張喔~!")
+            }
+            else if(this.state.img.length != 0 && this.state.vid.length == 0){
+            this.setState({checkimage:true})
+            this.SendPersonal();
+            }
+            else if(this.state.img.length == 0 && this.state.vid.length != 0){
+            this.setState({checkvideo:true})
+            this.SendPersonal();
+            }
+            else{
+            this.setState({checkimage:true})
+            this.setState({checkvideo:true})
+            this.SendPersonal();
+            }
           }
         }
       }
       else{
-        if(this.checkNumber(this.state.water) ==false || this.state.feelings ==""){
-            alert("請檢查測量長度和心得是否輸入資料")
-          }
-        else{
-          if(this.state.img.length == 0 && this.state.vid.length == 0){
-            alert("照片或影片至少要一張喔~!")
-          }
-          else if(this.state.img.length != 0 && this.state.vid.length == 0){
-          this.setState({checkimage:true})
-          this.SendPersonal();
-          }
-          else if(this.state.img.length == 0 && this.state.vid.length != 0){
-          this.setState({checkvideo:true})
-          this.SendPersonal();
-          }
-          else{
-          this.setState({checkimage:true})
-          this.setState({checkvideo:true})
-          this.SendPersonal();
-          }
-        }
+        alert("今天已經發布過囉~")
       }
     }
 
   _pickImage = async () => {
     try {
-      let result = await ImagePicker.launchCameraAsync({
+      let pickerResult = await ImagePicker.launchCameraAsync({
         mediaTypes: ImagePicker.MediaTypeOptions.Images,
         //allowsEditing: true,
-        //aspect: [4, 3], 這是裁切
+        //aspect: [4, 3], //這是裁切
         quality: 1,
       });
-      if (!result.cancelled) {
-        imagenumber++;
-        if(imagenumber >=2)
-        {
-          this.setState({Sendimg2:result.uri});
-        }
-        else
-        {
-          this.setState({Sendimg:result.uri});
-        }
-          this.state.img.push({key:imagenumber,image:result.uri});
-          
-          console.log(this.state.img);
-
-        console.log(this.state.img)
-          this.imagephoto1(this.state.img);
-          this.forceUpdate();
+      if (!pickerResult.cancelled) {
+          this._compressImage(pickerResult);      
         }        
       } 
       catch (E) {
       console.log(E);
     }
   };
+
+  _compressImage = async (pickerResult) => {
+    console.log('compress');
+
+    const manipResult = await ImageManipulator.manipulateAsync(
+            pickerResult.uri,
+            [{ resize: { width:500, height:500} }],
+            { compress: 0.7}
+        );
+        console.log(manipResult);
+        imagenumber++;
+        this.state.img.push({key:imagenumber,image:manipResult});
+        console.log(this.state.img); 
+        this.forceUpdate(); 
+        this.imagephoto1(this.state.img);
+  }
 // API : 紀錄+img : Upload_Record.aspx  ==> return : record_ID
 //        mp4     : Mp4.aspx            ==> Set : record_ID 
   imagephoto1 = (item) => {
@@ -388,7 +391,7 @@ export default class App extends React.Component {
       return (           
         <View style ={styles.cameraview1} key={img.key}>
           <Image style = {styles.camera_image} 
-                source={{uri:img.image}}/>  
+                source={{uri:img.image.uri}}/>  
         </View>     
       )
      })
@@ -397,7 +400,7 @@ export default class App extends React.Component {
     imagephoto2 = () => {
     
           //this.setState({ image1:"123"});
-            console.log(this.state.vid)
+            //console.log(this.state.vid)
             //console.log(this.state.task1)
                 return this.state.vid.map((vid) => {  
             return (           
@@ -423,12 +426,11 @@ export default class App extends React.Component {
       let result = await ImagePicker.launchImageLibraryAsync({
         mediaTypes: ImagePicker.MediaTypeOptions.Images,
         //allowsEditing: true,
-        //aspect: [4, 3],這是裁切
+        //aspect: [4, 3],//這是裁切
         quality: 1,
       });
       if (!result.cancelled) {
-        imagenumber++;
-        this.state.img.push({key:imagenumber,image:result.uri});
+        this._compressImage(result);     
       }
       this.forceUpdate();
     } catch (E) {
@@ -521,6 +523,7 @@ export default class App extends React.Component {
                 videonumber++;
                   this.state.vid.push({key:videonumber,vid:video.uri});
                 //this.setState({ vid:video.uri });
+                console.log(123)
                 console.log(this.state.vid)
                 this.forceUpdate();
             });
@@ -604,36 +607,34 @@ export default class App extends React.Component {
     let { image } = this.state;
       if(this.state.isLoading){
         return(
+          <ImageBackground source = {require('../../images/login_background.png')} style = {styles.login_image}>
           <View style ={styles.background}>
-          <ActivityIndicator size="large" color="#0000ff"/>
+          <ActivityIndicator size = {80} color="#4d805e"/>
           </View>
+          </ImageBackground>
         )
       }
   else if(this.state.isLoading == false && this.state.video2){
     return (
     <ImageBackground source={require('../../images/Re_background.png')} style = {styles.background}>
    
-     <View style ={styles.upperspace}>
-        <TouchableOpacity style={styles.backbutton} onPress={()=>{ this.props.navigation.goBack();}}>
+        <TouchableOpacity style={styles.backbutton} onPress={()=>{ 
+          this.props.navigation.state.params.refresh();
+          this.props.navigation.goBack();}}>
           <Image style={styles.back}
           source={require("../../images/retune.png")}/>
-          
         </TouchableOpacity>
-        </View>
 
         <View style ={styles.center}>
         <View style ={styles.dateview}>
         <Text style ={styles.date}>{(this.state.currentDay.getMonth()+1)+"/"+this.state.currentDay.getDate()} </Text>
         </View>
-        <View style ={styles.inputview}>
         <TextInput style = {styles.inputtext} underlineColorAndroid= 'rgba(0,0,0,0)' 
                      placeholder = "在想什麼呢?"
                      placeholderTextColor = "#ADADAD"
                      onChangeText={(feelings) => this.setState({feelings})} 
                      value={this.state.feelings}//寫入state           
                     />
-        </View>
-        </View>
         <View style ={styles.center2}>
         <ScrollView>  
         <Text style ={(styles.Title)}>照片:</Text>
@@ -641,6 +642,7 @@ export default class App extends React.Component {
         <Text style ={(styles.Title)}>影片:</Text>
         {this.imagephoto2()}
         </ScrollView>  
+        </View>
         </View>
         <TouchableOpacity style = {styles.sendbutton}  onPress={this.Check}>
         <Text style = {styles.SB_text}>發布</Text>
@@ -711,7 +713,7 @@ export default class App extends React.Component {
                             <TouchableOpacity
                                 onPress={() => { this.toogleRecord() }}
                             >
-                                <Ionicons name="ios-radio-button-on" size={70} color={this.state.recording ? "white" : "red"} />
+                                <Ionicons name="ios-radio-button-on" size={70} color={this.state.recording ? "red" : "white"} />
                             </TouchableOpacity>
                         </View>
                     </Camera>
@@ -732,12 +734,19 @@ const styles = StyleSheet.create({
     resizeMode:'contain',
     flex:1,
   },
+  login_image: {
+        width:'100%',
+        height:'100%',
+        flex: 1,
+        justifyContent: "center",
+      },
       container: {
       top:"30%",
       left:"20%",
       alignItems:'center',
       justifyContent:'center',
       height:"50%",
+      //backgroundColor:'#333',
       //width:"80%",
 },
       container1: {
@@ -757,7 +766,7 @@ const styles = StyleSheet.create({
         width: '100%', 
         height: '8%',
         //marginBottom:'5%',
-        //backgroundColor:'#82ab8f',
+        backgroundColor:'#82ab8f',
         top:'1%',
         //left:"5%",
         position: 'absolute',
@@ -765,9 +774,9 @@ const styles = StyleSheet.create({
 
         center:{
         width: '92.5%', 
-        height: '55.5%',
+        height: '49%',
         //backgroundColor:'#82ab8f',
-        top:'5%',
+        top:'-10%',
         //marginVertical:"10%",
         left:"4%",
         borderRadius:15,
@@ -775,63 +784,48 @@ const styles = StyleSheet.create({
         //position: 'absolute',
         },
         center2:{
-        width: '92.5%', 
-        height: '30%',
-        //backgroundColor:'#82ab8f',
-        top:'-30%',
+        width: '90%', 
+        height: '55%',
+        //backgroundColor:'#333',
+        top:'41%',
         //marginVertical:"10%",
-        left:"4%",
+        left:'5%',
         borderRadius:15,
         //marginBottom:'5%',
-        //position: 'absolute',
+        position: 'absolute',
         },
         dateview:{
-        width: '100%', 
+        width: '25%', 
         height: '8%',
         //backgroundColor:'#fbfadf',
-        top:'4%',
-        //marginVertical:"10%",
-        //left:"4%",
+        top:'2.5%',
+        alignItems:'center',
+        justifyContent:'center',
+        textAlign: 'center',
         borderRadius:15,
-        //marginBottom:'5%',
-        //position: 'absolute',
+        position: 'absolute',
         },
         date:{
-        width: '95%', 
-        height: '100%',
-        //backgroundColor:'#333',
-        //top:'5%',
-        //marginVertical:"10%",
-        left:"5%",
-        borderRadius:15,
         fontFamily:'nunito-bold',
         fontSize: 20,
-        //marginBottom:'5%',
-        //position: 'absolute',
-        },
-        inputview:{
-        width: '100%', 
-        height: '38%',
-        //backgroundColor:'#fbfadf',
-        top:'4%',
-        borderRadius:15,
         },
         inputtext:{
-        top:'3%',
-        height:'97%',
+        top:'10%',
+        height:'30%',
         width:'90%',
         left:'5%',
         textAlignVertical:"top",
-        //backgroundColor:'#FFFFFF',
+        //backgroundColor:'#333',
         borderColor: "#000000",
         borderRadius: 15, 
         fontSize:25,
+        position: 'absolute',
         //borderWidth: 1,
         },
         cameraview1:{
         width: '60%', 
-        height: 170,
-        backgroundColor:'#000000',
+        height: 110,
+        //backgroundColor:'#000000',
         //top:'10%',
         marginVertical:"2.5%",
         left:"20%",
@@ -879,7 +873,7 @@ const styles = StyleSheet.create({
         textAlignVertical:"center",
         },
         camera_B:{
-        top:'88.5%',
+        top:'87.5%',
         left:"5%",
         width: "26.52%",  
         height: "9.7%",
@@ -887,7 +881,7 @@ const styles = StyleSheet.create({
         borderRadius:15,
         },
         video_B:{
-        top:'88.5%',
+        top:'87.5%',
         left:"37%",
         width: "26.52%",  
         height: "9.7%",
@@ -896,7 +890,7 @@ const styles = StyleSheet.create({
         borderRadius:15,
         },
         gallery_B:{
-        top:'88.5%',
+        top:'87.5%',
         left:"69%",
         width: "26.52%",  
         height: "9.7%",
@@ -906,7 +900,7 @@ const styles = StyleSheet.create({
         },
         ruler_B:{
         left:"2%",
-        width: "18.5%",  
+        width: "20%",  
         height: "100%",
         backgroundColor:'#333',
         position: 'absolute',
@@ -914,7 +908,7 @@ const styles = StyleSheet.create({
         },
         ruler_B2:{
         left:"25%",
-        width: "18.5%",  
+        width: "20%",  
         height: "100%",
         backgroundColor:'#333',
         position: 'absolute',
@@ -922,13 +916,13 @@ const styles = StyleSheet.create({
         },
         water_B:{
         left:"52%",
-        width: "18.5%",  
+        width: "20%",  
         height: "100%",
         position: 'absolute',
         borderRadius:100,
         },
         PorA:{
-          top:'75%',
+          top:'73%',
           height:'10%',
           width:'90%',
           left:'5%',
@@ -937,11 +931,13 @@ const styles = StyleSheet.create({
         },
     backbutton: {
     resizeMode:'stretch',
-    width: "10%", 
-    height: "100%",
+    width: "8%", 
+    height: "7%",
     left:'5%',
+    top:"6.5%",
     //bottom:'0%' ,
     position: 'absolute',
+    //backgroundColor:'#333',
   },
   back: {
    width: "100%", 
@@ -1043,6 +1039,6 @@ const styles = StyleSheet.create({
     fontSize: 25,
     //marginVertical:'5%',
     justifyContent: 'center',
-    marginHorizontal:'5%',
+    //marginHorizontal:'5%',
   },
 });  

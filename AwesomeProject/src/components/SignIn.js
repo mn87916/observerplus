@@ -12,7 +12,7 @@ export default class Form extends Component{
         this.state = {user_txt: 'asd',pass_txt: 'asd'};
         this.state = {menu: ''};
         this.state = {
-        isLoading:false,
+          isLoading:false,
         }
         
         }
@@ -20,13 +20,15 @@ export default class Form extends Component{
     {
         this.state.isLoading = true;
         //Alert.alert('測試','帳號為：'+this.state.user_text+'，密碼為：'+this.state.pass_text)
+        this.forceUpdate();
+
         var queryURL = 'https://observerplus.club/API/login.aspx';
         let parameters = new FormData();
         parameters.append("account", this.state.user_text);
         parameters.append("password", this.state.pass_text);
         global.GlobalVariable.account = this.state.user_text;
         global.GlobalVariable.password = this.state.pass_text;
-        this.forceUpdate();
+        
 
 
   fetch(queryURL,{
@@ -66,7 +68,7 @@ export default class Form extends Component{
     render(){
       if(this.state.isLoading){
         return(
-            <ImageBackground source = {require('../images/login_background.png')} style = {styles.image}>   
+            <ImageBackground source = {require('../images/login_background.png')} style = {styles.login_image}>   
                 <View style = {styles.container}>
 
                 <ActivityIndicator size = {80} color="#4d805e"/>
@@ -83,7 +85,7 @@ export default class Form extends Component{
       else{
         return(      
           
-          <ImageBackground source = {require('../images/login_background.png')} style = {styles.image}>   
+          <ImageBackground source = {require('../images/login_background.png')} style = {styles.login_image}>   
                 <View style = {styles.container}>
                   
                     <View style={styles.card}>
@@ -218,7 +220,7 @@ const styles = StyleSheet.create({
         //marginVertical: 4,
         color: 'white',
       },
-      image: {
+      login_image: {
         width:'100%',
         height:'100%',
         flex: 1,

@@ -6,6 +6,12 @@ export const Taskstyles = StyleSheet.create({
     justifyContent:'center',
     flex:1,
   },
+  login_image: {
+    width:'100%',
+    height:'100%',
+    flex: 1,
+    justifyContent: "center",
+  },
   toptext:{  
     fontFamily:'nunito-bold',
     borderRadius:10,
@@ -62,27 +68,26 @@ export const Taskstyles = StyleSheet.create({
     left:'44%',
   },
   imagesize:{
-  //width:'75%',  
-  //padding:'5%',
-  height:"100%",
-  width:"100%",
-  //backgroundColor:'#333',
-  },
-  back:{
-    top:'5%',
-    left:'3%',
-    height:"6%",
-    width:"9%",
+    width: "100%", 
+    height: "100%",
     resizeMode:'stretch',
+  },
+  backbutton: {
+    resizeMode:'stretch',
+    width: "8%", 
+    height: "7%",
+    left:'5%',
+    top:"6.5%",
+    //bottom:'0%' ,
+    position: 'absolute',
     //backgroundColor:'#333',
-    position:'absolute',
   },
   tableview:{
-    height:'12%',
+    height:'10%',
     width:'80%',
     resizeMode:'stretch',
     marginHorizontal:"10%",
     marginVertical:"5%",
-    top:"10%",
+    top:"8%",
   }
 });

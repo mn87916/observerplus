@@ -48,7 +48,6 @@ componentDidMount()
       console.log(this.state.Data_record);
       this.setState({isLoading:false})
       //console.log(this.state.Data_record);
-
         
     })
     .catch((error) => {
@@ -105,7 +104,7 @@ componentDidMount()
      })
   }
 
-  ImgT = (item) => { 
+  /*ImgT = (item) => { 
     console.log("123456798");
     console.log(item);
     return this.state.img.map((item) => {  
@@ -118,15 +117,17 @@ componentDidMount()
         />         
       )
      })
-  }
+  }*/
 
   render() {
 		const { width , height} = Dimensions.get('window');
 		if(this.state.isLoading){
         return(
+          <ImageBackground source = {require('../../images/login_background.png')} style = {Gallery.login_image}>
           <View style ={Gallery.container}>
-          <ActivityIndicator size="large" color="#4d805e"/>
+          <ActivityIndicator size = {80} color="#4d805e"/>
           </View>
+          </ImageBackground>
         )
       }
       else{
@@ -137,18 +138,18 @@ componentDidMount()
       </Image>
       </TouchableOpacity>   
       <View style ={(Gallery.container2)}>      
-      
+      <View style ={(Gallery.CardBox7)}>   
       <ScrollView >
-      <Text style ={(Gallery.Title)}>心得:</Text>
-      <Text style ={(Gallery.Rec)}>{this.state.Data_record.Date}</Text>
-      <Text style ={(Gallery.Rec)}>{this.state.Data_record.rec}</Text>
-      <Text style ={(Gallery.Title)}>照片:</Text>
+      <Text style ={(Gallery.Rec2)}>{this.state.Data_record.Date}</Text>
+      <Text style ={(Gallery.Title2)}>心得:</Text>
+      <Text style ={(Gallery.Rec)}>{this.state.Data_record.Re}</Text>
+      <Text style ={(Gallery.Title2)}>照片:</Text>
       {this.Img(this.state.Data_record.IMG)}
-      <Text style ={(Gallery.Title)}>影片:</Text>
+      <Text style ={(Gallery.Title2)}>影片:</Text>
       {this.Vid(this.state.Data_record.MP4)}
       </ScrollView>
       </View>      
-      
+      </View> 
     </ImageBackground>
 		);
   }

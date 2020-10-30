@@ -1,1 +1,6 @@
 [0913/113456.939:ERROR:settings.cc(320)] Settings magic is not 1129342067
+[1015/133044.441:ERROR:directory_reader_win.cc(43)] FindFirstFile: ╰参тぃ﹚隔畖 (0x3)
+[1016/125312.084:ERROR:directory_reader_win.cc(43)] FindFirstFile: ╰参тぃ﹚隔畖 (0x3)
+[1024/160730.305:ERROR:directory_reader_win.cc(43)] FindFirstFile: ╰参тぃ﹚隔畖 (0x3)
+[1028/134225.993:ERROR:directory_reader_win.cc(43)] FindFirstFile: ╰参тぃ﹚隔畖 (0x3)
+[1030/083131.236:ERROR:directory_reader_win.cc(43)] FindFirstFile: ╰参тぃ﹚隔畖 (0x3)

@@ -1,9 +1,10 @@
 import React, {Component} from 'react';  
-import {Platform, StyleSheet,Dimensions, Text, View,TouchableOpacity,Image,ActivityIndicator,FlatList,ScrollView,ImageBackground } from 'react-native';
+import {Platform, StyleSheet,Dimensions,Linking, Text, View,TouchableOpacity,Image,ActivityIndicator,FlatList,ScrollView,ImageBackground } from 'react-native';
 import '../../data/GlobalVariable.js';
 import { Video } from 'expo-av';
 import VideoPlayer from 'expo-video-player'
 import { Gallery } from '../Gallery/GalleryStyle';
+import * as FileSystem from 'expo-file-system';
 //import { MaterialIcons, Octicons } from '@expo/vector-icons';
 //import ImageView from "react-native-image-viewing";
   
@@ -19,6 +20,8 @@ export default class App extends React.Component {
            mute: false,
            shouldPlay: true,
            obj_key:"",
+           pdfUrl: '',
+           download:true,
           }
         }
   componentDidMount()
@@ -121,7 +124,46 @@ export default class App extends React.Component {
             </View>
         )
       }
-        }
+    }
+
+    download = () => {
+     /* FileSystem.downloadAsync(
+      'https://observerplus.club/w.docx',
+      FileSystem.documentDirectory + 'w.docx'
+    )
+      .then(({ uri }) => {
+        console.log('Finished downloading to ', uri);
+      })
+      .catch(error => {
+        console.error(error);
+      });*/
+      this.setState({download:false})
+      var queryURL = 'https://observerplus.club/API/E_file.aspx';
+      let parameters = new FormData();
+      parameters.append("obj_ID",this.state.obj_key);
+      fetch(queryURL,{
+        method: 'POST',
+        body: parameters,
+            })
+      // response.json() => 把 response 的資料轉成 json
+      // 如果你想要原封不動的接到 response 的資料，可以用 response.text()
+      .then((response) => response.json() )
+      .then((responseData) =>  { 
+        this.setState({pdfUrl:responseData})
+        this.setState({download:true})
+        Linking.canOpenURL(this.state.pdfUrl.file).then(supported => {
+    if (!supported) {
+    console.warn('Cant handle url: ' + this.state.pdfUrl.file);
+    } else {
+    return Linking.openURL(this.state.pdfUrl.file);
+    }
+    }).catch(err => console.error('An error occurred',this.state.pdfUrl.file));
+    })
+    .catch((error) => {
+      console.warn(error);
+    })
+    .done();
+    }
 
        /* handlePlayAndPause = () => {  
     this.setState((prevState) => ({
@@ -137,14 +179,16 @@ export default class App extends React.Component {
 
   render() {
     const { width , height} = Dimensions.get('window');
-    if(this.state.isLoading){
+    if(this.state.isLoading || this.state.isLoading ==false && this.state.download == false){
         return(
+          <ImageBackground source = {require('../../images/login_background.png')} style = {Gallery.login_image}>
           <View style ={Gallery.container}>
-          <ActivityIndicator size="large" color="#4d805e"/>
+          <ActivityIndicator size = {80} color="#4d805e"/>
           </View>
+          </ImageBackground>
         )
       }
-      else{
+      else if(this.state.isLoading ==false && this.state.download == true){
           return (
         
     <ImageBackground source={require('../../images/Gallery_background.png')} style = {Gallery.container}>
@@ -152,7 +196,10 @@ export default class App extends React.Component {
           <Image style={Gallery.back}
           source={require("../../images/retune.png")}/> 
         </TouchableOpacity>
-    
+    <TouchableOpacity style={Gallery.backbutton2} onPress= {() =>this.download()}>
+          <Image style={Gallery.back}
+          source={require("../../images/download.png")}/>
+        </TouchableOpacity>
      <View style ={(Gallery.container1)}>
       <FlatList data = {this.state.Gallery} 
         keyExtractor={(item, key) =>key.toString()}
@@ -160,11 +207,17 @@ export default class App extends React.Component {
         return(
         <ScrollView>
         <View style ={(Gallery.CardBox)}>       
+            <View style ={(Gallery.CardBox6)}>
             <Text style ={(Gallery.Title)}>{item.Date}</Text>
-            <Text style ={(Gallery.Contents)}>{item.Re}</Text>            
+            </View>
+            <View style ={(Gallery.CardBox5)}>
+            <Text style ={(Gallery.Contents)}>{item.Re.substring(0,10)+"......"}</Text>     
+            </View>       
             {this.ImgorVideo(item)}
             {this.ImgorVideo2(item)}
           <TouchableOpacity onPress ={()=>{ this.props.navigation.navigate("Data_record",{"rcd_ID":item.ID});}} style ={(Gallery.CardBox4)}>
+            <Image style={Gallery.Photos}
+            source={require("../../images/picture.png")}/>     
             <Text style ={(Gallery.OverFlow)}>{item.Overflow}</Text> 
           </TouchableOpacity>
         </View>       
@@ -176,8 +229,7 @@ export default class App extends React.Component {
 
     </ImageBackground>
     );  
-      }
-    
+    }
   }  
 } 
 

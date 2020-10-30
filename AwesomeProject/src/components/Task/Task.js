@@ -12,12 +12,16 @@ export default class Task extends React.Component {
            task:"",
            isLoading:true,
            obj_ID:"",
+           obj_token:"",
+           Dailey_Exam_ID:"",
         }   
       }
   componentDidMount()
   {   
       this.forceUpdate();
       this.state.obj_ID = this.props.navigation.getParam("obj_key");
+      this.state.obj_token = this.props.navigation.getParam("obj_token");
+      this.state.Dailey_Exam_ID = this.props.navigation.getParam("Dailey_Exam_ID");
       var queryURL = 'https://observerplus.club/API/Mission.aspx';
       let parameters = new FormData();
       parameters.append("obj_ID",this.state.obj_ID);
@@ -172,6 +176,10 @@ export default class Task extends React.Component {
     }
   }
 
+  refresh=()=>{
+    this.componentDidMount()
+  }
+
   task1_change()
   {
     if(this.state.task.Miswater == false)
@@ -185,19 +193,26 @@ export default class Task extends React.Component {
     {
       let Dailey_Exam_ID = this.state.task.Dailey_Exam_ID
       let mis_ID = this.state.task.mis_ID
-      this.props.navigation.navigate("ExamA",{"mis_ID":mis_ID ,"Dailey_Exam_ID":Dailey_Exam_ID})
+      let Examount1 = this.state.task.Examount1
+      let Examount2 = this.state.task.Examount2
+      let Examount3 = this.state.task.Examount3
+      this.props.navigation.navigate("ExamA",{"mis_ID":mis_ID ,"Dailey_Exam_ID":Dailey_Exam_ID,"Examount2":Examount2,"Examount3":Examount3})
     }
     else if(this.state.task.Examount1 == true && this.state.task.Examount2 == false)
     {
       let Dailey_Exam_ID = this.state.task.Dailey_Exam_ID
       let mis_ID = this.state.task.mis_ID
-      this.props.navigation.navigate("ExamB",{"Dailey_Exam_ID":Dailey_Exam_ID,"mis_ID":mis_ID})
+      let Examount1 = this.state.task.Examount1
+      let Examount3 = this.state.task.Examount3
+      this.props.navigation.navigate("ExamB",{"Dailey_Exam_ID":Dailey_Exam_ID,"mis_ID":mis_ID,"Examount1":Examount1,"Examount3":Examount3})
     }
     else if(this.state.task.Examount1 == true && this.state.task.Examount2 == true && this.state.task.Examount3 == false)
     {
       let Dailey_Exam_ID = this.state.task.Dailey_Exam_ID
       let mis_ID = this.state.task.mis_ID
-      this.props.navigation.navigate("ExamC",{"Dailey_Exam_ID":Dailey_Exam_ID,"mis_ID":mis_ID})
+      let Examount1 = this.state.task.Examount1
+      let Examount2 = this.state.task.Examount2
+      this.props.navigation.navigate("ExamC",{"Dailey_Exam_ID":Dailey_Exam_ID,"mis_ID":mis_ID,"Examount1":Examount1,"Examount2":Examount2})
     }
     else
     {     
@@ -209,30 +224,33 @@ export default class Task extends React.Component {
   {
     if(this.state.task.DaileyImage == false)
     {
-      let obj_token = this.props.navigation.getParam('obj_token');
-      this.props.navigation.navigate("Measure",{"obj_token":obj_token});
+      let obj_key = this.state.obj_ID
+      let obj_token = this.state.obj_token
+      this.props.navigation.navigate("Measure",{"obj_key":obj_key,"obj_token":obj_token,refresh:()=>this.componentDidMount()});
     }
   }
   task4_change()
   {
     if(this.state.task.DaileyRead == false)
     {
-      this.props.navigation.navigate("CommonRead");
+      this.props.navigation.navigate('CommonRead',{refresh:()=>this.componentDidMount()});
     }
     
   }
     render() {
       if(this.state.isLoading){
         return(
+          <ImageBackground source = {require('../../images/login_background.png')} style = {Taskstyles.login_image}>
           <View style ={Taskstyles.container}>
-          <ActivityIndicator size="large" color="#0000ff"/>
+          <ActivityIndicator size = {80} color="#4d805e"/>
           </View>
+          </ImageBackground>
         )
       }
       else{
         return(
           <ImageBackground source={require('../../images/taskbackground.png')} style = {Taskstyles.container}> 
-          <TouchableOpacity onPress ={() => this.props.navigation.navigate("Menu2")} style = {Taskstyles.back}>
+          <TouchableOpacity onPress ={() => this.props.navigation.navigate("Menu2")} style = {Taskstyles.backbutton}>
             <Image source={require('../../images/retune.png')} style = {Taskstyles.imagesize}>
             </Image>
           </TouchableOpacity>   

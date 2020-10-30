@@ -8,17 +8,26 @@ export default class TableExample extends Component {
 
      getImage = (Weather) => {
 
-    switch (Weather) { //天氣圖片顯示
-        case "sun":
-            return require("../../images/sunny.png")
-            break;
-        case "rain":
-            return require("../../images/raining.png")
-            break;
-        default:
-            return require("../../images/sunny.png");
-            break;
-    }
+        if(Weather <=2)
+         {
+           return require("../../images/sunny.png")
+         }
+         else if(Weather <= 5)
+         {
+           return require("../../images/partly_cloudy.png")
+         }
+         else if(Weather <= 7)
+         {
+           return require("../../images/cloudy.png")
+         }
+         else
+         {
+           return require("../../images/raining.png")
+         }
+         /*晴天:1-2
+          多雲:3-5
+          陰天:6-7
+          雨天:>=8*/
     }
 
     constructor(props) {
@@ -74,6 +83,7 @@ export default class TableExample extends Component {
                     source={this.getImage(responseData[i].Weather)}/>
                     </View>);
         this.state.tableData.push(rowData);
+        console.log(responseData[i].Weather)
       }
       this.forceUpdate()
       this.setState({isLoading:false})
@@ -91,7 +101,7 @@ export default class TableExample extends Component {
         const options = {
             tableHead: ['日期', '公分', '成長', '溫度', '天氣'],
             widthArr: [
-            Dimensions.get('window').height * 0.1,
+            Dimensions.get('window').height * 0.11,
             Dimensions.get('window').height * 0.1,
             Dimensions.get('window').height * 0.1,
             Dimensions.get('window').height * 0.1,
@@ -100,31 +110,28 @@ export default class TableExample extends Component {
 
         if(this.state.isLoading){
         return(
-          <View style ={styles.container}>
-          <ActivityIndicator size="large" color="#4d805e"/>
+          <ImageBackground source = {require('../../images/login_background.png')} style = {styles.login_image}>
+          <View style ={styles.background}>
+          <ActivityIndicator size = {80} color="#4d805e"/>
           </View>
+          </ImageBackground>
         )
       }
         else{
             return(
-                <ImageBackground source={require('../../images/announcement_background.png')} style = {Globalstyles.Background}>
-                <View style={styles.container}>
-        <View style ={styles.upperspace}>
+        <ImageBackground source={require('../../images/Growth_table_background.png')} style = {styles.container}>
         <TouchableOpacity style={styles.backbutton} onPress={()=>{ this.props.navigation.goBack();}}>
           <Image style={styles.back}
           source={require("../../images/retune.png")}/>
-          
         </TouchableOpacity>
-        </View>
+        <View style = {styles.tablecontainer}>
             <ScrollView>
-            <View style = {styles.tablecontainer}>
                 <Table borderStyle={{borderWidth: 2, borderColor: '#4d805e',}}>
                     <Row data={options.tableHead} widthArr={options.widthArr} style={styles.head} textStyle={styles.text}/>
                     <Rows data={this.state.tableData} widthArr={options.widthArr} style={styles.row}  textStyle={styles.text}/>
                 </Table>
-                </View>
                 </ScrollView>
-            </View>
+                </View>
                </ImageBackground>
             )
         }        
@@ -135,15 +142,23 @@ export default class TableExample extends Component {
 
 const styles = StyleSheet.create({
     container: {
-     flex: 1,
+    resizeMode:'contain',
+    justifyContent:'center',
+    flex:1,
      },
+    background: {
+    alignItems:'center',
+    justifyContent:'center',
+    flex:1,
+  },
      tablecontainer: {
      //flex: 1,
      padding:16,
      alignItems:'center',
      //backgroundColor: '#333',
      width: '100%', 
-     height: '100%',
+     height: '80%',
+     top:'5%',
      //position: 'absolute',
      },
     head: {
@@ -167,7 +182,12 @@ const styles = StyleSheet.create({
         height: '10%',
         marginBottom:'5%'
     },
-    
+    login_image: {
+        width:'100%',
+        height:'100%',
+        flex: 1,
+        justifyContent: "center",
+      },
     back: {
         width: "100%", 
         height: "100%",
@@ -185,13 +205,15 @@ const styles = StyleSheet.create({
         resizeMode:'stretch',
     },
     backbutton: {
-        resizeMode:'stretch',
-        width: "10%", 
-        height: "90%",
-        left:'2%',
-        bottom:'0%' ,
-        position: 'absolute',
-    },
+    resizeMode:'stretch',
+    width: "8%", 
+    height: "7%",
+    left:'5%',
+    top:"6.5%",
+    //bottom:'0%' ,
+    position: 'absolute',
+    //backgroundColor:'#333',
+  },
     row: { 
         flexDirection: 'row',
         backgroundColor: '#fbfadf',

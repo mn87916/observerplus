@@ -1,17 +1,25 @@
-import React from 'react';
-import {Text, View,navigator,StatusBar } from 'react-native';
+import React, {Component} from 'react'; 
+import {Text, View,navigator,StatusBar,StyleSheet } from 'react-native';
 import { Globalstyles } from '../../style/Global';
 
-
-export default function PSInformation({navigation}) {
+export default class PSInformation extends React.Component{
+  render(){
   return(
-    <View style ={(Globalstyles.container)}>
+    <ImageBackground source={require('../../images/Track_growth.png')} style = {styles.background}>
     <StatusBar
     //barStyle="light-content"
     //backgroundColor = "#3498db"
     hidden={true}
     />
     <Text style ={(Globalstyles.text)}> 個人資訊</Text>
-    </View>
-  )
+    </ImageBackground>
+    )
+  }
 }
+const styles = StyleSheet.create({ 
+  background: {
+    alignItems:'center',
+    justifyContent:'center',
+    flex:1,
+  },
+});

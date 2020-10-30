@@ -8,6 +8,7 @@ import PSInformation from '../src/components/PSInformation/PSInformation';
 import Account from '../src/components/AccManage/Account';
 import Rank from '../src/components/Rank/Rank';
 import Map from '../src/components/Map/Map';
+import MapDetail from '../src/components/Map/MapDetail';
 import CommonRead from '../src/components/CommonRead/CommonRead';
 import LearningFile from '../src/components/LearningFile/LearningFile';
 import Task from '../src/components/Task/Task';
@@ -230,6 +231,14 @@ const components = {
         navigationOptions:{
             header: null,
             title:'SearchMap',
+            
+        }
+    },
+       MapDetail: {
+        screen: MapDetail,
+        navigationOptions:{
+            header: null,
+            title:'MapDetail',
             
         }
     },

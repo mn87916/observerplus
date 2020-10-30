@@ -60,20 +60,20 @@ export default class App extends React.Component {
     }
     if(this.state.isLoading){
         return(
+          <ImageBackground source = {require('../images/login_background.png')} style = {styles.login_image}>
           <View style ={styles.background}>
-          <ActivityIndicator size="large" color="#0000ff"/>
+          <ActivityIndicator size = {80} color="#4d805e"/>
           </View>
+          </ImageBackground>
         )
       }
   else{
     return (
       <ImageBackground source={require('../images/menu2_background.png')} style = {Globalstyles.Background}>
-        <View style ={styles.upperspace}>
           <TouchableOpacity style={styles.backbutton} onPress={()=>{ this.props.navigation.goBack();}}>
           <Image style={styles.buttonimage}
           source={require("../images/retune.png")}/>
           </TouchableOpacity>
-        </View>
         
         <View style ={styles.bookname}>
         <Text style ={styles.T_bookname}>{this.props.navigation.getParam("obj_name")}</Text>
@@ -84,14 +84,14 @@ export default class App extends React.Component {
           source={require("../images/record.png")}/>
         </TouchableOpacity>
 
-         <TouchableOpacity style={styles.measurebutton} onPress={()=>{ this.props.navigation.navigate("Measure",{"obj_token":this.state.obj_token , "obj_key":this.state.B_content});}}>
+         <TouchableOpacity style={styles.measurebutton} onPress={()=>{ this.props.navigation.navigate("Measure",{"obj_token":this.state.obj_token , "obj_key":this.state.B_content,refresh:()=>this.componentDidMount()});}}>
           <Image style={styles.buttonimage}
           source={require("../images/measure.png")}/>
         </TouchableOpacity>
 
         <TouchableOpacity style={styles.photosbutton} onPress={()=>{this.props.navigation.navigate("Gallery" , {"obj_key":this.state.B_content});}}>
           <Image style={styles.buttonimage}
-          source={require("../images/photos.png")}/>
+          source={require("../images/Learning_file.png")}/>
         </TouchableOpacity>
 
         <TouchableOpacity style={styles.missionbutton} onPress={()=>{this.props.navigation.navigate("Task",{"obj_token":this.state.obj_token ,"obj_key":this.state.B_content});}}>
@@ -104,7 +104,7 @@ export default class App extends React.Component {
           <Text style ={styles.levelbuttonText}>等級 {this.state.levelstep}</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.rankbutton} onPress={()=>{ this.props.navigation.navigate("Rank",{obj_key:this.state.B_content});}}>
+        <TouchableOpacity style={styles.GWbutton} onPress={()=>{ this.props.navigation.navigate("GoodWork",{obj_key:this.state.B_content});}}>
           <Image style={styles.buttonimage}
           source={require("../images/rank.png")}/>
         </TouchableOpacity>
@@ -150,6 +150,11 @@ const styles = StyleSheet.create({
   container:{
     flex:1,
   },
+  background:{
+    resizeMode:'contain',
+    justifyContent:'center',
+    flex:1,
+  },
   upperspace:{
         width: '100%', 
         height: '10%',
@@ -157,20 +162,22 @@ const styles = StyleSheet.create({
     },
 
     backbutton: {
-        resizeMode:'stretch',
-        width: "10%", 
-        height: "90%",
-        left:'2%',
-        bottom:'0%' ,
-        position: 'absolute',
-    },
-     rankbutton: {
+    resizeMode:'stretch',
+    width: "8%", 
+    height: "7%",
+    left:'5%',
+    top:"6.5%",
+    //bottom:'0%' ,
+    position: 'absolute',
+    //backgroundColor:'#333',
+  },
+  GWbutton: {
    width: '12%',
    height: '7%',
    resizeMode:'stretch',
     left:'80%',
     position: 'absolute',
-    top:'5%' ,
+    top:"6.5%",
   },
 
    recordbutton: {
@@ -179,7 +186,7 @@ const styles = StyleSheet.create({
    resizeMode:'stretch',
     left:'3%',
     position: 'absolute',
-    bottom: '50%',
+    top:"35%",
   },
   measurebutton: {
    width: "45%", 
@@ -187,7 +194,7 @@ const styles = StyleSheet.create({
    resizeMode:'stretch',
     left:'53%',
     position: 'absolute',
-    bottom: '50%',
+    top:"35%",
   },
   photosbutton: {
    width: "45%", 
@@ -195,7 +202,7 @@ const styles = StyleSheet.create({
    resizeMode:'stretch',
     left:'3%',
     position: 'absolute',
-    bottom: '20%',
+    top:"62.5%",
   },
   missionbutton: {
    width: "45%", 
@@ -203,9 +210,14 @@ const styles = StyleSheet.create({
    resizeMode:'stretch',
     left:'53%',
     position: 'absolute',
-    bottom: '20%',
+    top:"62.5%",
   },
-
+  login_image: {
+    width:'100%',
+    height:'100%',
+    flex: 1,
+    justifyContent: "center",
+  },
   buttonimage: {
    width: '100%', 
    height: '100%',
@@ -213,7 +225,7 @@ const styles = StyleSheet.create({
   },
   levelbutton:{
     left:'55%',
-    bottom:'73%',
+    top:"25%",
     width:150,
     backgroundColor:'#FBFADF',
     borderRadius:25,
@@ -271,9 +283,14 @@ const styles = StyleSheet.create({
       backgroundColor:"#faa45b",
     },
   bookname:{
-    left:'18%',
-    top:'10%' ,
+    left:'5%',
+    top:'17%' ,
+    width:"40%",
     position: 'absolute',
+    //backgroundColor:"#333",
+    textAlign :'center',
+    alignItems:'center',
+    justifyContent:'center',  
     },
   T_bookname:{
     fontSize:25,

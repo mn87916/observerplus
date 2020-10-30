@@ -9,4 +9,7 @@ global.GlobalVariable = {
    boolrecord:true,
    searchtext:'SEARCH_TXT',
    searchoption:'',
+   school_ID:'',
+   school_name:'',
+   know_ID:'',
 };

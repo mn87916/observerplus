@@ -11,6 +11,7 @@ import Modal, {
   SlideAnimation,
   ScaleAnimation,
 } from 'react-native-modals';
+import HyperlinkedText from 'react-native-hyperlinked-text';
 
 export default class App extends Component {
 
@@ -38,9 +39,31 @@ export default class App extends Component {
     }
   }
 
+  ChangeMode(){
+    this.webref.injectJavaScript(`knowmapview()`);
+    this.setState({ bottomModalAndTitle: false })
+    if (this.state.detailbuttontext == "查看種植/飼養紀錄"){
+      this.state.detailbuttontext = "查看介紹";
+    }
+    else{
+      this.state.detailbuttontext = "查看種植/飼養紀錄";
+    }
+  }
+
+  gotoDetail(){
+    if(this.state.school_name != ''){
+      this.props.navigation.navigate("MapDetail");
+    }
+    else
+    Alert.alert("請選擇有效的座標!")
+    
+
+  }
+
 
   setTGOSMapType(maptype){
      this.webref.injectJavaScript(`setMapType('`+maptype+`');`);
+     this.setState({ bottomModalAndTitle: false });
   }
 
   backAction = () => {   //Andorid 返回鍵事件 為了Modal功能表而建
@@ -140,12 +163,16 @@ export default class App extends Component {
     this.state = { webViewHeight: 0 ,
                   usermarkerswitchValue: false,
                   content: false,
+                  isdetaillshow:false,
                   markertitle:null,
                   markeraddress:null,
                   markerwebsite:null,
                   markerdescription:null,
                   searchtext:null,
                   searchoption:null,
+                  school_ID:null,
+                  school_name:null,
+                  know_ID:null,
 
                   schoolvisible:true,
                   citizenvisible:true,
@@ -154,6 +181,8 @@ export default class App extends Component {
                   farmvisible:true,
                   fireflyvisible:true,
                   ecologyvisible:true,
+
+                  detailbuttontext:"查看種植/飼養紀錄",
                   };
 
      
@@ -189,16 +218,45 @@ export default class App extends Component {
            
           onMessage={(event) => {
             const message = JSON.parse(event.nativeEvent.data)
-            if(message.command === 'get info'){            //接收座標資訊
+            console.log(message.command)
+            if(message.command == 'getinfo'){            //接收座標資訊
                this.state.markertitle = message.payload.title;
                this.state.markeraddress = message.payload.address;
                this.state.markerwebsite = message.payload.website;
                this.state.markerdescription = message.payload.description;
+               this.state.school_ID = message.payload.school_ID;
+               this.state.school_name = message.payload.school_name;
+              global.GlobalVariable.know_ID = ''; 
+
+                if(this.state.content == false){
+                  this.setState(previousState => ({ content: !previousState.content }))
+                }
+              
+                if(this.state.school_name != ''){
+                  global.GlobalVariable.school_ID =  this.state.school_ID;
+                  global.GlobalVariable.school_name = this.state.school_name;
+                  this.state.isdetaillshow =true;
+                }
+                else{
+                  this.state.isdetaillshow =false;
+                }
+
+            }
+            else if(message.command == 'getknow'){
+              this.state.markerwebsite = '';
+              this.state.markerdescription = '';
+               this.state.markeraddress = message.payload.description;
+               this.state.markertitle = message.payload.title;
+               this.state.know_ID =  message.payload.know_ID;
+               global.GlobalVariable.know_ID = this.state.know_ID;
+               global.GlobalVariable.school_ID =  '';
+               global.GlobalVariable.school_name = '';
+               console.log(message.payload.know_ID)
                if(this.state.content == false){
                 this.setState(previousState => ({ content: !previousState.content }))
+                this.state.isdetaillshow =true;
               }
             }
-            
             this.forceUpdate();
           }}
           />
@@ -207,19 +265,34 @@ export default class App extends Component {
         this.state.content ? 
         <View style = {styles.leveldetailcontainer}>
         <View style={styles.card}>
+        <ScrollView>
         
           <Text style={styles.markertitle}> {this.state.markertitle} </Text>
-          <Text style={styles.markerdescription}> 地址: {this.state.markeraddress} </Text>
-          <Text style={styles.markerdescription}> 網址: {this.state.markerwebsite} </Text>
+          <Text style={styles.markerdescription}>  {this.state.markeraddress} </Text>
+
+          <HyperlinkedText style={styles.entry}>{this.state.markerwebsite}</HyperlinkedText>
+         
           <Text style={styles.markerdescription}>  {this.state.markerdescription} </Text>
+          <View style ={styles.bottomspace}>
+
+          </View>
+          </ScrollView>
+            {
+              this.state.isdetaillshow ?
+              <TouchableOpacity style = {styles.detailbutton} onPress={()=> this.gotoDetail()}>
+                <Text style ={styles.buttonText}>{this.state.detailbuttontext}</Text>
+              </TouchableOpacity> :null
+            }
+            
         </View>
+
         <TouchableOpacity style = {styles.closebutton}
            onPress={this.onClosePress.bind(this)}>        
             <Image style={styles.buttonimage}
           source={require("../../images/close.png")}/>
         </TouchableOpacity>
-          <View style ={styles.bottomspace}>
-          </View>
+
+
          </View> : null
        }
 
@@ -247,7 +320,7 @@ export default class App extends Component {
       <Modal.BottomModal
           visible={this.state.bottomModalAndTitle}
           onTouchOutside={() => this.setState({ bottomModalAndTitle: false })}
-          height={0.8}
+          height={0.9}
           width={1}
           onSwipeOut={() => this.setState({ bottomModalAndTitle: false })}
           modalTitle={
@@ -328,6 +401,12 @@ export default class App extends Component {
             <TouchableOpacity style = {styles.searchbutton} onPress = {this.onSearchPress.bind(this)}>
               <Image style={styles.buttonimage} source={require("../../images/glass.png")}/>
             </TouchableOpacity>
+          </View>
+          <View style  = {styles.searchview}>
+            <TouchableOpacity style = {styles.switchmodebutton} onPress = {this.ChangeMode.bind(this)}>
+              <Text style ={styles.buttonText}>切換地圖模式</Text>
+            </TouchableOpacity>
+            <Image style={styles.modeimage} source={require("../../images/normalmode.png")}/>
           </View>
         <View style = {styles.border}>
           <Text style = {styles.modalstext}>
@@ -490,7 +569,7 @@ const styles = StyleSheet.create({
   morefeaturebuttonview:{
       flexDirection: 'row',
       justifyContent: 'space-between',
-      height:'23%',
+      height:'15%',
       
     },
   maptypetext:{
@@ -527,13 +606,13 @@ const styles = StyleSheet.create({
     },
     markertitle:{
       top:'3%',
-      left:'3%',
+      left:'1%',
       fontSize:30,
     },
     markerdescription:{
       fontSize:20,
       top:'2%',
-      left:'4%',
+      left:'1%',
     },
     border:{
       //paddingTop:'2%',
@@ -571,5 +650,45 @@ const styles = StyleSheet.create({
     },
     searchbutton:{
        width:'15%',
-    }
+    },
+    switchmodebutton:{
+        width:'100%',
+        backgroundColor:'#faa45b',
+        borderRadius:10,
+        borderWidth:1,
+        marginVertical:10,
+        paddingVertical : 4,
+    },
+    buttonText:{
+        fontSize:25,
+        fontWeight:'500',
+        color:'#000000',
+        textAlign :'center',
+    },
+    modeimage:{
+      width:'15%',
+      resizeMode:'stretch',
+      height:'90%',
+    },
+      detailbutton:{
+        width:'90%',
+        backgroundColor:'#faa45b',
+        borderRadius:10,
+        borderWidth:1,
+        marginVertical:10,
+        paddingVertical : 4,
+        position: 'absolute',
+        bottom:'1%',
+        left:'5%',
+    },
+    bottomspace:{
+      height: '10%',
+    },
+    entry: {
+      textAlign: 'left',
+      color: '#333333',
+      margin: 15,
+      fontSize:20,
+  },
+
 });

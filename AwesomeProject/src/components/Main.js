@@ -22,6 +22,7 @@ export default class App extends React.Component {
   componentDidMount()
   {
     this.state.main = global.GlobalVariable.main;
+    console.log(this.state.main)
     this.forceUpdate();
     this.setState({ isLoading: false });
   }
@@ -31,8 +32,8 @@ export default class App extends React.Component {
     if(item.obj_key % 3 == 1)
     {
       return(
-        <TouchableOpacity style={styles.menu2button} onPress={()=>{ this.props.navigation.navigate("Menu2",item);}}>
-        <Image style={styles.switchimage,{height: Dimensions.get('window').height * 0.4, width: Dimensions.get('window').width * 0.5}}
+        <TouchableOpacity style={styles.menu2button,{height: Dimensions.get('window').height * 0.5, width: Dimensions.get('window').width * 0.55}} onPress={()=>{ this.props.navigation.navigate("Menu2",item);}}>
+        <Image style={styles.switchimage}
           source={require("../images/menu2.png")}>
           </Image>
           <View style ={styles.bookname_1}>
@@ -44,8 +45,8 @@ export default class App extends React.Component {
     else if(item.obj_key % 3 == 2)
     {
       return(
-        <TouchableOpacity style={styles.menu2button} onPress={()=>{ this.props.navigation.navigate("Menu2",item);}}>
-        <Image style={styles.switchimage,{height: Dimensions.get('window').height * 0.4, width: Dimensions.get('window').width * 0.5}}
+        <TouchableOpacity style={styles.menu2button,{height: Dimensions.get('window').height * 0.5, width: Dimensions.get('window').width * 0.55}} onPress={()=>{ this.props.navigation.navigate("Menu2",item);}}>
+        <Image style={styles.switchimage}
           source={require("../images/menu2_1.png")}>
           </Image>
           <View style ={styles.bookname_2}>
@@ -57,8 +58,8 @@ export default class App extends React.Component {
     else
     {
       return(
-        <TouchableOpacity style={styles.menu2button} onPress={()=>{ this.props.navigation.navigate("Menu2",item);}}>
-        <Image style={styles.switchimage,{height: Dimensions.get('window').height * 0.4, width: Dimensions.get('window').width * 0.5}}
+        <TouchableOpacity style={styles.menu2button,{height: Dimensions.get('window').height * 0.5, width: Dimensions.get('window').width * 0.55}} onPress={()=>{ this.props.navigation.navigate("Menu2",item);}}>
+        <Image style={styles.switchimage}
           source={require("../images/menu2_2.png")}>
           </Image>
           <View style ={styles.bookname_3}>
@@ -74,9 +75,11 @@ export default class App extends React.Component {
     }
     if(this.state.isLoading){
         return(
+          <ImageBackground source = {require('../images/login_background.png')} style = {styles.login_image}>
           <View style ={styles.background}>
-          <ActivityIndicator size="large" color="#0000ff"/>
+          <ActivityIndicator size = {80} color="#4d805e"/>
           </View>
+          </ImageBackground>
         )
       }
   else{
@@ -107,26 +110,16 @@ export default class App extends React.Component {
         }}
         />       
         </View>
-      
-        <TouchableOpacity style={styles.learningbutton} onPress={()=>{alert("you clicked learningfiles")}}>
-          <Image style={styles.buttonimage}
-          source={require("../images/learningfiles.png")}/>
-        </TouchableOpacity>
 
         <TouchableOpacity style={styles.mapsbutton} onPress={()=>{ this.props.navigation.navigate("Map");}}>
           <Image style={styles.buttonimage}
           source={require("../images/maps.png")}/>       
         </TouchableOpacity>
-        <TouchableOpacity style={styles.goodworkbutton} onPress={()=>{ this.props.navigation.navigate("GoodWork");}}>
+        <TouchableOpacity style={styles.goodworkbutton} onPress={()=>{ this.props.navigation.navigate('CommonRead', {refresh:()=>this.componentDidMount()});}}>
           <Image style={styles.buttonimage}
-          source={require("../images/goodwork.png")}/>
- 
+          source={require("../images/know.png")}/>
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.knowbutton} onPress={()=>{this.props.navigation.navigate("CommonRead")}}>
-          <Image style={styles.buttonimage}
-          source={require("../images/know.png")}/>  
-        </TouchableOpacity>
       </ImageBackground>
     );
   }
@@ -135,7 +128,7 @@ export default class App extends React.Component {
 
 const styles = StyleSheet.create({
   background: {
-    resizeMode:'contain',
+    alignItems:'center',
     justifyContent:'center',
     flex:1,
   },
@@ -159,6 +152,12 @@ const styles = StyleSheet.create({
    height: '100%',
    resizeMode:'stretch',
   },
+    login_image: {
+        width:'100%',
+        height:'100%',
+        flex: 1,
+        justifyContent: "center",
+      },
     announcebutton: {
    width: '12%', 
    height: '7%',
@@ -185,11 +184,12 @@ const styles = StyleSheet.create({
   },
   menu2button: {
     //resizeMode:'stretch',
-    //width: "60%", 
-    //height: "42%",
+    //width: "50%", 
+    //height: "100%",
     //left:'20%',
     //bottom:'44%' ,
     //position: 'absolute',
+    //backgroundColor:'#333',
     
   },
   knowbutton: {
@@ -205,54 +205,71 @@ const styles = StyleSheet.create({
     width: "45%", 
     height: "20%",
     left:'5%',
-    bottom:'3%' ,
+    top:"72.5%",
     position: 'absolute',
+    //backgroundColor:'#333',
   },
     goodworkbutton: {
     resizeMode:'stretch',
     width: "45%", 
     height: "20%",
     left:'51%',
-    bottom:'3%' ,
+    top:"72.5%",
     position: 'absolute',
   },
 
 
   switchingcontainer:{
     width:'100%',
-    height:'40%',
+    height:'50%',
     justifyContent: 'center',
     alignItems: 'center',
-    bottom:'15%',
+    top:"-9%",
    //paddingHorizontal:'5%'
+   //backgroundColor:'#333',
     
   },
   switchimage:{
-    
+    width:"100%",
+    height:"100%",
     resizeMode:'stretch',
   },
   switchbutton:{
     justifyContent: 'center',
     alignItems: 'center',
-    marginHorizontal:50,
+    marginHorizontal:30,
   },
   bookname_1:{
-    left:'32.5%',
-    top:'25%' ,
+    left:'15%',
+    top:'27.5%' ,
+    width:"60%",
     position: 'absolute',
+    textAlign :'center',
+    justifyContent: 'center',
+    alignItems: 'center',
     //backgroundColor:'#333',
   },
     bookname_2:{
-    left:'32.5%',
+    left:'30%',
     top:'18%' ,
+    width:"35%",
+    height:"15%",
     position: 'absolute',
     //backgroundColor:'#333',
+    textAlign :'center',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
     bookname_3:{
-    left:'32.5%',
+    left:'30%',
     top:'18%' ,
+    width:"35%",
+    height:"15%",
     position: 'absolute',
     //backgroundColor:'#333',
+    textAlign :'center',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   T_bookname:{
     fontSize:20,

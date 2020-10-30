@@ -15,8 +15,10 @@
     "expo-av": "~8.1.0",
     "expo-camera": "^8.2.0",
     "expo-file-system": "~8.1.0",
+    "expo-image-manipulator": "^8.3.0",
     "expo-image-picker": "~8.1.0",
     "expo-location": "~8.1.0",
+    "expo-media-library": "~8.1.0",
     "expo-video-player": "^1.5.8",
     "react": "~16.9.0",
     "react-dom": "~16.9.0",
@@ -24,7 +26,9 @@
     "react-native-camera": "^3.28.0",
     "react-native-chart-kit": "^5.6.0",
     "react-native-fetch": "^2.0.0",
+    "react-native-fetch-blob": "^0.10.8",
     "react-native-gesture-handler": "^1.6.1",
+    "react-native-hyperlinked-text": "^1.0.2",
     "react-native-modals": "^0.19.9",
     "react-native-reanimated": "^1.8.0",
     "react-native-safe-area-context": "^0.7.3",
@@ -35,8 +39,7 @@
     "react-native-webview": "^10.3.2",
     "react-navigation": "^4.3.7",
     "react-navigation-drawer": "^2.4.11",
-    "react-navigation-stack": "^2.3.11",
-    "expo-media-library": "~8.1.0"
+    "react-navigation-stack": "^2.3.11"
   },
   "devDependencies": {
     "babel-preset-expo": "~8.1.0",

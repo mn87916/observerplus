@@ -12,6 +12,7 @@ constructor(props)
         this.state = {
            Announment:[],
            isLoading:true,
+           announce:true,
         }   
       }
 
@@ -32,12 +33,17 @@ componentDidMount()
     // 如果你想要原封不動的接到 response 的資料，可以用 response.text()
     .then((response) => response.json() )
     .then((responseData) => { 
+      if(responseData.length == 0){
+        this.setState({isLoading:false})
+        this.setState({announce:false})
+      }
+      else{
       for (var i = 0; i < responseData.length; i++) {
       this.state.Announment.push(responseData[i])
       this.setState({isLoading:false})
-      }
-      
-      
+        }
+      }     
+      this.forceUpdate();
     })
     .catch((error) => {
       console.warn(error);
@@ -47,22 +53,22 @@ componentDidMount()
 }
 
   render() {
-  if(this.state.isLoading){
+  if(this.state.isLoading && this.state.announce){
         return(
+          <ImageBackground source = {require('../..//images/login_background.png')} style = {AnnounceStyles.login_image}>
           <View style ={AnnounceStyles.container}>
-          <ActivityIndicator size="large" color="#0000ff"/>
+          <ActivityIndicator size = {80} color="#4d805e"/>
           </View>
+          </ImageBackground>
         )
       }
-  else{
+  else if(this.state.isLoading == false && this.state.announce){
    return(
-    <ImageBackground source={require('../../images/announcement_background.png')} style = {AnnounceStyles.container}>         
-      <TouchableOpacity onPress ={() => this.props.navigation.navigate("Main")} style = {AnnounceStyles.back}>
+    <ImageBackground source={require('../../images/announcement_background.png')} style = {AnnounceStyles.container}>      
+      <TouchableOpacity onPress ={() => this.props.navigation.navigate("Main")} style = {AnnounceStyles.backbutton}>
       <Image source={require('../../images/retune.png')} style = {AnnounceStyles.imagesize}>
       </Image>
-      </TouchableOpacity>    
-      <Image source={require('../../images/announcement_title.png')} style = {AnnounceStyles.title} >
-      </Image>  
+      </TouchableOpacity>     
       <View style ={(AnnounceStyles.AnnounceCard)}>
       <FlatList data = {this.state.Announment} 
         keyExtractor={(item, key) =>key.toString()}
@@ -73,7 +79,6 @@ componentDidMount()
             <Text style ={(AnnounceStyles.AnnounTitle)}>{item.AnnounTitle}</Text>
             <Text style ={(AnnounceStyles.AnnounDate)}>{item.AnnounDate}</Text>
             <Text style ={(AnnounceStyles.AnnounContent)}>{item.AnnounContent.substring(0,15)+"......"}</Text>
-            <Text style ={(AnnounceStyles.AnnounDate)}>{item.key}</Text>
           </TouchableOpacity>        
         </ScrollView>
         );
@@ -82,6 +87,19 @@ componentDidMount()
       </View> 
     </ImageBackground>
    );
+  }
+  else if(this.state.isLoading == false && this.state.announce == false){
+    return(
+    <ImageBackground source={require('../../images/announcement_background.png')} style = {AnnounceStyles.container}>      
+      <TouchableOpacity onPress ={() => this.props.navigation.navigate("Main")} style = {AnnounceStyles.backbutton}>
+      <Image source={require('../../images/retune.png')} style = {AnnounceStyles.imagesize}>
+      </Image>
+      </TouchableOpacity>   
+      <View style ={(AnnounceStyles.AnnounceCard2)}>
+      <Text style ={(AnnounceStyles.AnnounTitle2)}>現在沒有公告喔~!</Text>
+      </View>
+     </ImageBackground> 
+    );
   }
  }
 } 
