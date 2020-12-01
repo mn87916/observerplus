@@ -50,6 +50,21 @@ export default class App extends Component {
     }
   }
 
+  ChangeVisible(){
+    this.state.visiblestatusarr = [];
+    this.state.visiblestatusarr.push(this.state.schoolvisible)
+    this.state.visiblestatusarr.push(this.state.citizenvisible)
+    this.state.visiblestatusarr.push(this.state.butterflyvisible)
+    this.state.visiblestatusarr.push(this.state.shopvisible)
+    this.state.visiblestatusarr.push(this.state.farmvisible)
+    this.state.visiblestatusarr.push(this.state.fireflyvisible)
+    this.state.visiblestatusarr.push(this.state.ecologyvisible)
+    console.log(this.state.visiblestatusarr)
+    
+    this.webref.injectJavaScript(`changevisible('`+ this.state.visiblestatusarr +`')`)
+    this.setState({ bottomModalAndTitle: false })
+  }
+
   gotoDetail(){
     if(this.state.school_name != ''){
       this.props.navigation.navigate("MapDetail");
@@ -90,7 +105,6 @@ export default class App extends Component {
     componentDidMount(){
      this._getLocation();
      BackHandler.addEventListener("hardwareBackPress", this.backAction);  //返回鍵監聽
-
     }
 
     componentWillUnmount() {
@@ -104,31 +118,31 @@ export default class App extends Component {
     //--------------------------座標篩選Function--------------------------
     toggleschoolvisibleSwitch = (value) =>{
         this.setState({schoolvisible: value})
-        this.webref.injectJavaScript(`markervisible('school')`);
+        //this.webref.injectJavaScript(`markervisible('school')`);
     }
     togglecitizenvisibleSwitch = (value) =>{
         this.setState({citizenvisible: value})
-        this.webref.injectJavaScript(`markervisible('citizen')`);
+        //this.webref.injectJavaScript(`markervisible('citizen')`);
     }
     togglebutterflyvisibleSwitch = (value) =>{
         this.setState({butterflyvisible: value})
-        this.webref.injectJavaScript(`markervisible('butterfly')`);
+        //this.webref.injectJavaScript(`markervisible('butterfly')`);
     }
     toggleshopvisibleSwitch = (value) =>{
         this.setState({shopvisible: value})
-        this.webref.injectJavaScript(`markervisible('shop')`);
+        //this.webref.injectJavaScript(`markervisible('shop')`);
     }
     togglefarmvisibleSwitch = (value) =>{
         this.setState({farmvisible: value})
-        this.webref.injectJavaScript(`markervisible('farm')`);
+        //this.webref.injectJavaScript(`markervisible('farm')`);
     }
     togglefireflyvisibleSwitch = (value) =>{
         this.setState({fireflyvisible: value})
-        this.webref.injectJavaScript(`markervisible('firefly')`);
+        //this.webref.injectJavaScript(`markervisible('firefly')`);
     }
     toggleecologyvisibleSwitch = (value) =>{
         this.setState({ecologyvisible: value})
-        this.webref.injectJavaScript(`markervisible('ecology')`);
+        //this.webref.injectJavaScript(`markervisible('ecology')`);
     }
    
    _getLocation = async() =>{
@@ -175,12 +189,13 @@ export default class App extends Component {
                   know_ID:null,
 
                   schoolvisible:true,
-                  citizenvisible:true,
-                  butterflyvisible:true,
-                  shopvisible:true,
-                  farmvisible:true,
-                  fireflyvisible:true,
-                  ecologyvisible:true,
+                  citizenvisible:false,
+                  butterflyvisible:false,
+                  shopvisible:false,
+                  farmvisible:false,
+                  fireflyvisible:false,
+                  ecologyvisible:false,
+                  visiblestatusarr:[],
 
                   detailbuttontext:"查看種植/飼養紀錄",
                   };
@@ -489,6 +504,9 @@ export default class App extends Component {
             value = {this.state.ecologyvisible}
             />
          </View>
+           <TouchableOpacity style = {styles.switchmodebutton} onPress = {this.ChangeVisible.bind(this)}>
+              <Text style ={styles.buttonText}>套用</Text>
+            </TouchableOpacity>
          
             </View>
             </View>
@@ -534,13 +552,6 @@ const styles = StyleSheet.create({
         height:'30%',
         paddingVertical : 4,
     },
-
-    buttonText:{
-        fontSize:25,
-        fontWeight:'500',
-        color:'#000000',
-        textAlign :'center',
-    },
     buttonview:{
        flexDirection: 'row',
       justifyContent: 'space-around',
@@ -569,7 +580,7 @@ const styles = StyleSheet.create({
   morefeaturebuttonview:{
       flexDirection: 'row',
       justifyContent: 'space-between',
-      height:'15%',
+      height:'13%',
       
     },
   maptypetext:{
@@ -626,7 +637,7 @@ const styles = StyleSheet.create({
     switchview:{
        flexDirection: 'row',
        justifyContent:"space-between",
-       height:"9%",
+       height:"8%",
     },
     mapfilterimage:{
        width: "12%", 
@@ -660,7 +671,7 @@ const styles = StyleSheet.create({
         paddingVertical : 4,
     },
     buttonText:{
-        fontSize:25,
+        fontSize:20,
         fontWeight:'500',
         color:'#000000',
         textAlign :'center',

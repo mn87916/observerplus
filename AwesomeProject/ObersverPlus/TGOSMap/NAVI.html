@@ -1,0 +1,80 @@
+<!--程式碼範例-->
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/>
+		<title>TGOS MAP API for Web 建立導航</title>
+	<!--<script type="text/javascript" src="http://api.tgos.tw/TGOS_API/tgos?ver=2&AppID=CSwJuIujgEwCy85E+Rx0Obvx5OG7Rv4wVdXjbI8vGsVrVWsUcvYirw==&APIKey=cGEErDNy5yN/1fQ0vyTOZrghjE+jIU6uU/z/OM2TrgGFT8yIJRekfLYLHjpvgtDWJz8seou3LWsTmu2+x80//OkJDsFRfW9o9Ap8o/dyD0iFvlpwVj7iikvRgi2XWyk+xyRba0FfBG++ID25seP2u2CtKl/i2y17HPoQU6Hr5kFymLBzcP2fkiwSxUHpZ89jH95EBjd02QidHf3hEpA5tOdMOgG7ze8CWnOCU/weB4LIP6PkTM87Tp/MVr3wvaXpNhFAwYVSC9X6leexSc/nw159KocKxrew4Z+/ITTt69FOlL3DHbF6Q1LzRvX0HZ1rqFqJcjbKxO7OfnaT8GSDPWQzHFPQLDzI1B24RMOWM1k=" charset="utf-8"></script>
+	-->
+	<script type="text/javascript" src="http://api.tgos.tw/TGOS_API/tgos?ver=2&AppID=x+JLVSx85Lk=&APIKey=in8W74q0ogpcfW/STwicK8D5QwCdddJf05/7nb+OtDh8R99YN3T0LurV4xato3TpL/fOfylvJ9Wv/khZEsXEWxsBmg+GEj4AuokiNXCh14Rei21U5GtJpIkO++Mq3AguFK/ISDEWn4hMzqgrkxNe1Q==" charset="utf-8"></script>
+	
+		<!--下載後請將yourID及yourkey取代為您申請所取得的APPID及APIKEY方能正確顯示服務-->
+		
+		<script type="text/javascript"> 
+			var pMap;  //建立初始化地圖
+			function InitWnd() {
+				var pOMap = document.getElementById("OMap");
+				var mapOptions = {
+					disableDefaultUI: true  //mapTypeControl(關閉所有地圖控制項)
+				};
+				pMap = new TGOS.TGOnlineMap(pOMap, TGOS.TGCoordSys.EPSG3826, mapOptions);  //建立TGOnlineMap物件, 初始化地圖
+				pMap.fitBounds(new TGOS.TGEnvelope(300255, 2774643, 309502, 2766718));
+			}
+			function CalcRoute() {
+				var blocks = new Array();  //建立空的禁行點陣列
+				var ori = new TGOS.TGPoint(303894, 2773234);		//設定起點
+				var dest = new TGOS.TGPoint(306108, 2770451);		//設定終點
+				var wpts = new Array();  //建立空的中途經過點陣列
+	
+				var p1 = new TGOS.TGMarker(pMap, ori, '起點');	//在地圖上繪出所有點位
+				var p2 = new TGOS.TGMarker(pMap, dest, '終點');
+		
+				var RouteAnalysis = new TGOS.TGRoutes();	//宣告路徑規劃物件
+				var request = {							//設定路徑參數
+					avoidHighways: true,				//是否迴避收費道路
+					blockpoints: blocks,				//設定禁行點
+					coordinateSystem: "EPSG:3826",		//指定坐標系統
+					destination: dest,					//設定終點
+					origin: ori,						//設定起點
+					shortestRoute: true,				//使用最短路徑方法進行分析
+					wayPoints: wpts						//設定經過點
+				};
+				RouteAnalysis.route(request, function(result){	//執行路徑規劃
+					var NavigateInfo = "";			//建立空字串, 準備寫入導航資訊
+					var routes = result.routes;					//取出規劃結果
+					var pathes = routes[0].overviewPath;		//由規劃結果中取出路徑(TGLineString形式)
+					var TotalDist = routes[0].distance;		//取出規劃結果總路徑長度
+					var TotalTime = routes[0].time;			//取出規劃結果總耗時
+					var string0 = '路徑總長度 = ' + TotalDist.toFixed(0) + ' 公尺' + '<br>' + '總耗時 = ' + (TotalTime/60).toFixed(0) + ' 分 ' + (TotalTime%60) + ' 秒<br><br>';
+					NavigateInfo += string0;					//組合總長度及總耗時字串並加入並加入NavigateInfo
+					var line = new TGOS.TGLine(pMap, pathes, {	//將規劃路徑繪出, 使用TGLine物件
+						strokeColor: '#3300FF',
+						strokeWeight: 5,
+						strokeOpacity: 0.7
+					});
+		
+					var legs = routes[0].legs;		//取出所有導航分段
+					for (var i = 0; i < legs.length; i++) {	//使用迴圈 取出所有分段資訊
+						var LegDist = legs[i].distance;		//取出分段總長度
+						var string1 = '路段' + parseInt(i+1) + ' 總長度 = ' + LegDist.toFixed(2) + ' 公尺<br>';
+						NavigateInfo += string1;	//組合總長度資訊字串, 並加入NavigateInfo
+						var steps = legs[i].steps;	//取出分段內所有導航步驟
+						for (var j = 0; j < steps.length; j++) {	//使用迴圈取得所有步驟資訊
+							var Dist = steps[j].path.getLength();	//取得每個步驟的路徑長度
+							var info = steps[j].instructions;		//取得每個步驟的導航文字
+							var string2 = '前進 ' + Dist.toFixed(2) + '公尺後 ' + info + '<br>';
+							NavigateInfo += string2;	//組合所有導航步驟資訊字串, 並加入NavigateInfo
+						}
+					}
+					document.getElementById("Navigate").innerHTML = NavigateInfo;	//最後將NavigateInfo寫入網頁區塊Navigate內
+				});
+			}
+		</script>
+	</head>
+<body style="margin:0px" onload="InitWnd();">
+  <div id="OMap" style="width:640px;height:480px;border: 1px solid #C0C0C0;"></div>
+  <input type="button" value="路徑規劃" onclick="CalcRoute();">
+  
+  <!--建立一個分區Navigate, 作為顯示導航資訊用-->
+  <div id="Navigate" style="position:absolute; top:0px; left:645px; height:480px; width:300px; border: 1px solid #C0C0C0; overflow:auto;">
+</body>
+</html>                             

@@ -56,6 +56,8 @@
 				
 				.tabdivs{
 					margin:5px;
+					overflow: auto;
+					height:100%;
 				}
 .tab-label {
   display: -webkit-box;
@@ -101,6 +103,11 @@ input:checked ~ .tab-content {
   padding: 1em;
 }
 
+#search{
+	width:100%;
+	height:10%;
+	border-radius: 8px;
+}
 
 #chck1 {
   position: absolute;
@@ -117,6 +124,11 @@ input:checked ~ .tab-content {
   opacity: 0;
   z-index: -1;
 }
+#chck4 {
+  position: absolute;
+  opacity: 0;
+  z-index: -1;
+}
 .blurcontainer#blur.active{
 	
 	filter: blur(10px);
@@ -125,24 +137,326 @@ input:checked ~ .tab-content {
 }
 #popupdetail{
 	z-index:20; 
-	top: 40%;
+	top: 50%;
 	Left:50%;
-	width:600px;
+	width:75%;
+	height:85%;
 	position:fixed;
 	transform :translate(-50%,-50%);
 	padding: 50px;
 	box-shadow:0 5px 30px rgba(0,0,0,.30);
-	background:#151719;
-	background-color: #fbfadf;
+	border-radius:30px;
+	background: -webkit-linear-gradient(left top,#ffc393,#fbfadf);
+	background: -o-linear-gradient(bottom right, #ffc393,#fbfadf);
+	background: -moz-linear-gradient(bottom right, #ffc393,#fbfadf);
+	background: linear-gradient(to bottom right, #ffc393,#fbfadf);
 	visibility: hidden;
-	transition:0.5s:
+	transition: 0.5s;
+	overflow: auto;
 }
 #popupdetail.active{
 	visibility:visible;
 	opacity:1;
 	transition:0.5s;
 }
+#closebutton{
+	width:80px;
+	height:25px;
+	position:absolute;
+	left:90%;
+	top: 5%;
+}
+#backbutton{
+	width:35px;
+	height:40px;
+	position:absolute;
+	left:3%;
+	top: 3%;
+}
+.weatherimg{ 
+	width:40px;
+	height:40px;
+} 
+       .class_flex{
+            width: 100%;
+            display: flex !important;
+            overflow-x: scroll;
+            overflow-y: hidden;
+        }
+        .record_img {
+            border: 1px solid #333;
+            /*overflow: hidden;*/
+            height: 125px;
+            width: 125px !important;
+            margin: 0px 5px;
+        }
+        .record_img img{
+            width: 125px;
+            margin-top: 0px;
+        }
+        .flex{
+            display: flex;
+        }
+		.classworkflex{
+            display: flex !important;
+        }
+		.classbtn{
+			width:100px;
+			display: inline-block;
+			margin: 5% 20px;
+			padding:20px 0px;
+			text-align:center;
+			box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 3px 5px 0 rgba(0, 0, 0, 0.19);
+			background-color:#5d9b84;
+			color:#fff;
+			border-radius:15px;
+			position: relative;
+		}
+		
+.search {
+  width: 100%;
+  position: relative;
+  display: flex;
+}
+
+.searchTerm {
+  width: 100%;
+  border: 1px solid #5d9b84;
+  border-right: none;
+  padding: 5px;
+  border-radius: 5px 0 0 5px;
+  outline: none;
+  font-size: 15px;
+}
+
+.searchTerm:focus{
+  
+}
+
+.searchButton {
+  width: 40px;
+  height: 36px;
+  border: 1px solid #5d9b84;
+  background: #5d9b84;
+  text-align: center;
+  color: #fff;
+  border-radius: 0 5px 5px 0;
+  cursor: pointer;
+  font-size: 20px;
+}
+
+.wrap{
+  width: 30%;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+.searchresult button {
+  background-color: #fbfadf; 
+  border: 1px; 
+  height : 5%;
+  width: 100%; /* Set a width if needed */
+  display: block; /* Make the buttons appear below each other */
+  border-radius : 8px;
+  box-shadow: 0 4px 4px -2px rgba(0, 0, 0, 0.5);
+  font-size: 15px;
+  margin-top:3%;
+}
+.searchresult button:not(:last-child) {
+  /*border-bottom: none; /* Prevent double borders */
+}
+
+/* Add a background color on hover */
+.searchresult button:hover {
+  background-color: #faa45b;
+}
 
 
 
+.hello {
+  opacity: 1 !important;
+}
+.full {
+  position: fixed;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+}
+.full .content {
+  background-color: rgba(0,0,0,0.75) !important;
+  height: 100%;
+  width: 100%;
+  display: grid;
+}
+.full .content img {
+  left: 50%;
+  transform: translate3d(0, 0, 0);
+  animation: zoomin 1s ease;
+  max-width: 100%;
+  max-height: 100%;
+  margin: auto;
+}
+.byebye {
+  opacity: 0;
+}
+.byebye:hover {
+  transform: scale(0.2) !important;
+}
+.gallery {
+  display: grid;
+  grid-column-gap: 8px;
+  grid-row-gap: 8px;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  grid-auto-rows: 8px;
+  
+}
+.gallery img {
+  max-width: 100%;
+  border-radius: 8px;
+  box-shadow: 0 0 16px #333;
+ 
+}
+.gallery img:hover {
+  box-shadow: 0 0 32px #333;
+}
+.gallery .content {
+  padding: 4px;
+}
+.gallery .gallery-item {
+  transition: grid-row-start 300ms linear;
+  transition: transform 300ms ease;
+  transition: all 0.5s ease;
+  cursor: pointer;
+}
+.gallery .gallery-item:hover {
+  transform: scale(1.025);
+}
+@media (max-width: 600px) {
+  .gallery {
+    grid-template-columns: repeat(auto-fill, minmax(30%, 1fr));
+  }
+}
+@media (max-width: 400px) {
+  .gallery {
+    grid-template-columns: repeat(auto-fill, minmax(50%, 1fr));
+  }
+}
+@-moz-keyframes zoomin {
+  0% {
+    max-width: 50%;
+    transform: rotate(-30deg);
+    filter: blur(4px);
+  }
+  30% {
+    filter: blur(4px);
+    transform: rotate(-80deg);
+  }
+  70% {
+    max-width: 50%;
+    transform: rotate(45deg);
+  }
+  100% {
+    max-width: 100%;
+    transform: rotate(0deg);
+  }
+}
+@-webkit-keyframes zoomin {
+  0% {
+    max-width: 50%;
+    transform: rotate(-30deg);
+    filter: blur(4px);
+  }
+  30% {
+    filter: blur(4px);
+    transform: rotate(-80deg);
+  }
+  70% {
+    max-width: 50%;
+    transform: rotate(45deg);
+  }
+  100% {
+    max-width: 100%;
+    transform: rotate(0deg);
+  }
+}
+@-o-keyframes zoomin {
+  0% {
+    max-width: 50%;
+    transform: rotate(-30deg);
+    filter: blur(4px);
+  }
+  30% {
+    filter: blur(4px);
+    transform: rotate(-80deg);
+  }
+  70% {
+    max-width: 50%;
+    transform: rotate(45deg);
+  }
+  100% {
+    max-width: 100%;
+    transform: rotate(0deg);
+  }
+}
+@keyframes zoomin {
+  0% {
+    max-width: 50%;
+    transform: rotate(-30deg);
+    filter: blur(4px);
+  }
+  30% {
+    filter: blur(4px);
+    transform: rotate(-80deg);
+  }
+  70% {
+    max-width: 50%;
+    transform: rotate(45deg);
+  }
+  100% {
+    max-width: 100%;
+    transform: rotate(0deg);
+  }
+}
+
+.rcdcard{
+	background-color: #fbfadf;
+	border-radius: 8px;
+	margin-top: 20px;
+	box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 3px 5px 0 rgba(0, 0, 0, 0.19);
+}
+.cardflex{
+	display: flex;
+}
+.textpart{
+	width:50%;
+	font-size: 150%;
+}
+.gallerypart{
+	width:50%;
+	overflow: auto;
+}
+.stugallery{
+	height: 200px;
+    width: 200px;
+	display: flex;
+	
+}
+.stuimg{
+	max-width:100%;
+	max-height:100%;
+	margin-left:10px;
+}
+.cabimg{
+	border-radius:15px;
+
+ 
+}
+.des{
+	font-size: 120%;
+	 padding-left:20px;
+	padding-right:20px;
+}
 

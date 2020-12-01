@@ -6,9 +6,9 @@ var messageBox;                    												//訊息視窗物件
 var pMap;                   													//初始化地圖物件
 var cMap;
 //-----------------須自行修改的參數,包含點位坐標,訊息視窗內容及圖示檔案來源設定----------------------
-//var infotext =  ['<B>世新大學','<B>台北市政府'];        //依序填入地標名稱及訊息視窗內容, 可自行增減數量
 //var markerPoint = [];        		//依序填入地標坐標位置, 坐標數須與標記數一致
-var startPoint = new TGOS.TGPoint(304386.437, 2770442.812);      //起始點:台北中間  
+var startPoint = new TGOS.TGPoint(302176.52146819467, 2779861.3835988427);      //起始點:士林中間  
+var knowstartPoint = new TGOS.TGPoint(248017.89,2652198.379);    //知識地圖:台灣中間
 var imgUrl = ["http://api.tgos.tw/TGOS_API/images/marker2.png"];                //依序設定標記點圖示來源
 var currentlocUrl = "http://api.tgos.tw/TGOS_API/images/marker1.png";
 var mapTypeID = 'TGOSMAP'; 														//Maptype
@@ -21,18 +21,25 @@ var myMapinfotext = new Array();
 var myMapMarkerAddress = new Array();
 var myMapMarkerWebsite = new Array();
 var myMapMarkerDescription = new Array();
+var myMapSchoolIDArr = new Array();
+var knowID = new Array();
 var mCluster;
 var mClusters = new Array();
 var mySchoolpTGMarker = new TGOS.TGMarker();
 var pDatalength = 0;
-var myMapMarkersforRmv = new Array();
 var sidebaractivate = false;
 var longt = null;
 var lat = null;
 var AllTGOSMarkers = new Array();					//儲存所有座標，以便搜尋
+var knowledgemode = false;
+var knowledgetitle = '';
+var dontoff = "dontoff";
+var class_ID = '';
+var LoadGeoJsonFinished = false;
 
-//-----------------+7參數----------------------
 var school_name = '';
+var school_ID = '';
+var teachersname = '';
 
 //-----------------導航參數----------------------
 /*
@@ -72,10 +79,12 @@ function InitWnd()
 	pMap = new TGOS.TGOnlineMap(pOMap, TGOS.TGCoordSys.EPSG3826, mapOptiions,);    //EPSG3826 TWD97以X,Y順序為主；Google坐標系統的EPSG:3857 放大就沒東西
 	//初始地圖縮放層級
 	pMap.setMapTypeId(mapTypeID);
-	pMap.setZoom(7);	
+	pMap.setZoom(8);	
 	pMap.setCenter(startPoint);      //初始地圖中心點
 	LoadGeoJson()
-
+	document.getElementById("currentmode").innerHTML = "目前為:座標地圖模式";	 //預設地圖模式
+	document.getElementById("normalbutton").innerHTML = '<input type="button" value="查看Google街景" id="streetviewbutton" onclick="openstreetview()"><input type="button" value="查看種植/飼養紀錄" id="detailbutton" onclick="toggledetail()">';
+ 
 	/* for(var i = 0; i < infotext.length; i++) {
 
 		//------------------建立標記點---------------------
@@ -110,6 +119,7 @@ function WGS84toTWD97(long , lat)  {
 }
 			
 function LoadGeoJson(){
+	LoadGeoJsonFinished = false;
 	/****************  變數  ****************/
 	var url 				= "https://www.tgos.tw/MapSites/getGeoJson?themeid=19372";
 	var e 					= document.getElementById("ddl_json");
@@ -119,7 +129,8 @@ function LoadGeoJson(){
 	var butterflyurl 		= "http://192.192.155.112/TGOSMap/butterfly.png";
 	var fireflyurl 			= "http://192.192.155.112/TGOSMap/firefly.png";
 	var shopurl 			= "http://192.192.155.112/TGOSMap/shop.png";
-	var ecologyurl			= "http://192.192.155.112/TGOSMap/ecology.png"
+	var ecologyurl			= "http://192.192.155.112/TGOSMap/ecology.png";
+	var vegurl				= "http://192.192.155.112/TGOSMap/veg.png"
 	var eschoolcheckbox 	= document.getElementById("ESchoolvisible");
 	var citizenfarmcheckbox = document.getElementById("citizenfarmvisible");
 	var butterflycheckbox 	= document.getElementById("butterflyvisible");
@@ -129,12 +140,13 @@ function LoadGeoJson(){
 	var ecologycheckbox		= document.getElementById("ecologyvisible");
 	if(pData != null){
 		pData.clearAll();
-		for (var count=0; count < myMapMarkersforRmv.length; count++) {
-			myMapMarkersforRmv[count].setMap(null);
+		for (var count=0; count < AllTGOSMarkers.length; count++) {
+			AllTGOSMarkers[count].setMap(null);
 		}		
-		myMapMarkersforRmv 	= [];
+		AllTGOSMarkers.length = 0 ;
+		myMapinfotext.length = 0;
 	}
-
+	
 	pData = new TGOS.TGData({map: pMap});  //建立幾何圖層物件
 	//指定資料來源
 	pData.loadGeoJson(url,{idPropertyName:"GEOJSON"},function(graphic){  
@@ -145,6 +157,7 @@ function LoadGeoJson(){
 		var fireflymarkerImg 		= new TGOS.TGImage(fireflyurl, new TGOS.TGSize(35, 50), new TGOS.TGPoint(0, 0), new TGOS.TGPoint(10, 33));
 		var shopmarkerImg 			= new TGOS.TGImage(shopurl, new TGOS.TGSize(35, 50), new TGOS.TGPoint(0, 0), new TGOS.TGPoint(10, 33));
 		var ecologymarkerImg 		= new TGOS.TGImage(ecologyurl, new TGOS.TGSize(35, 50), new TGOS.TGPoint(0, 0), new TGOS.TGPoint(10, 33));
+		var vegmarkerImg 			= new TGOS.TGImage(vegurl, new TGOS.TGSize(35, 50), new TGOS.TGPoint(0, 0), new TGOS.TGPoint(10, 33));
 		console.log(pData)
 
 		var InfoWindowOptions = {
@@ -163,160 +176,189 @@ function LoadGeoJson(){
 			myMapMarkerAddress.push(pData.graphics[i].properties.地址)
 			myMapMarkerWebsite.push(pData.graphics[i].properties.官網)
 			myMapMarkerDescription.push(pData.graphics[i].properties.描述)
+			myMapSchoolIDArr.push(pData.graphics[i].properties.School_ID)
+			knowID.push(pData.graphics[i].properties.knowID)
+			console.log(knowID[i])
 			
-		
-			switch(pData.graphics[i].properties.類型){
-				case '國小':
-					var mySchoolpTGMarker = new TGOS.TGMarker(pMap, myMapMarkers[i],myMapinfotext[i], mymarkerImg,{flat:false});
-					var markerdetailinfo = new Object();			//為了儲存地標位置and標題以外的資訊所創的Object
-					markerdetailinfo.address = myMapMarkerAddress[i];
-					markerdetailinfo.website = myMapMarkerWebsite[i];
-					AllTGOSMarkers.push(mySchoolpTGMarker);
-					
-					if(eschoolcheckbox.checked == true){
-						mySchoolpTGMarker.setVisible(true);
-					}
-					else{
-						mySchoolpTGMarker.setVisible(false);
-					}
-					myMapMarkersforRmv.push(mySchoolpTGMarker);
-					
-					TGOS.TGEvent.addListener(mySchoolpTGMarker, 'click', function(mySchoolpTGMarker, markerdetailinfo){ 
+			
+			if(knowledgemode == false){
+				switch(pData.graphics[i].properties.類型){
+					case '國小':
+						var mySchoolpTGMarker = new TGOS.TGMarker(pMap, myMapMarkers[i],myMapinfotext[i], mymarkerImg,{flat:false});
+						var markerdetailinfo = new Object();			//為了儲存地標位置and標題以外的資訊所創的Object
+						markerdetailinfo.address = myMapMarkerAddress[i];
+						markerdetailinfo.website = myMapMarkerWebsite[i];
+						markerdetailinfo.schoolID = myMapSchoolIDArr[i];
+						AllTGOSMarkers.push(mySchoolpTGMarker);
+						
+						if(eschoolcheckbox.checked == true){
+							mySchoolpTGMarker.setVisible(true);
+						}
+						else{
+							mySchoolpTGMarker.setVisible(false);
+						}
+						
+						TGOS.TGEvent.addListener(mySchoolpTGMarker, 'click', function(mySchoolpTGMarker, markerdetailinfo){ 
+								return function () {                  
+									MarkerPressed(mySchoolpTGMarker.title,markerdetailinfo);
+									TWConvert(mySchoolpTGMarker.position.x,mySchoolpTGMarker.position.y);
+									navgoalpoint = mySchoolpTGMarker.position;
+									school_name = mySchoolpTGMarker.title;
+									school_ID = markerdetailinfo.schoolID;
+									console.log(school_ID); 
+								}
+						}(mySchoolpTGMarker,markerdetailinfo));
+						break;
+					case '農場':
+						var myFarmpTGMarker = new TGOS.TGMarker(pMap, myMapMarkers[i],myMapinfotext[i], myFarmmarkerImg, {flat:false});
+						var markerdetailinfo = new Object();			//為了儲存地標位置and標題以外的資訊所創的Object
+						markerdetailinfo.address = myMapMarkerAddress[i];
+						markerdetailinfo.website = myMapMarkerWebsite[i];
+						markerdetailinfo.description = myMapMarkerDescription[i];
+						AllTGOSMarkers.push(myFarmpTGMarker);
+						if(farmcheckbox.checked == true){
+							myFarmpTGMarker.setVisible(true);
+						}
+						else{
+							myFarmpTGMarker.setVisible(false);
+						}
+						
+						TGOS.TGEvent.addListener(myFarmpTGMarker, 'click', function(myFarmpTGMarker, markerdetailinfo){ 
+								return function () {                  
+									MarkerPressed(myFarmpTGMarker.title,markerdetailinfo);
+									TWConvert(myFarmpTGMarker.position.x,myFarmpTGMarker.position.y)
+									school_name = '';
+								}
+						}(myFarmpTGMarker,markerdetailinfo));
+						break;
+					case '市民農園':
+						var citizenfarmpTGMarker = new TGOS.TGMarker(pMap, myMapMarkers[i],myMapinfotext[i], citizenfarmmarkerImg, {flat:false});
+						var markerdetailinfo = new Object();			//為了儲存地標位置and標題以外的資訊所創的Object
+						markerdetailinfo.address = myMapMarkerAddress[i];
+						AllTGOSMarkers.push(citizenfarmpTGMarker);
+						if(citizenfarmcheckbox.checked == true){
+							citizenfarmpTGMarker.setVisible(true);
+						}
+						else{
+							citizenfarmpTGMarker.setVisible(false);
+						}
+						TGOS.TGEvent.addListener(citizenfarmpTGMarker, 'click', function(citizenfarmpTGMarker, markerdetailinfo){ 
 							return function () {                  
-								MarkerPressed(mySchoolpTGMarker.title,markerdetailinfo);
-								TWConvert(mySchoolpTGMarker.position.x,mySchoolpTGMarker.position.y);
-								navgoalpoint = mySchoolpTGMarker.position;
-								school_name = mySchoolpTGMarker.title;
+								MarkerPressed(citizenfarmpTGMarker.title,markerdetailinfo);						
+								TWConvert(citizenfarmpTGMarker.position.x,citizenfarmpTGMarker.position.y)					
+								school_name = '';
 							}
-					}(mySchoolpTGMarker,markerdetailinfo));
-					break;
-				case '農場':
-					var myFarmpTGMarker = new TGOS.TGMarker(pMap, myMapMarkers[i],myMapinfotext[i], myFarmmarkerImg, {flat:false});
-					var markerdetailinfo = new Object();			//為了儲存地標位置and標題以外的資訊所創的Object
-					markerdetailinfo.address = myMapMarkerAddress[i];
-					markerdetailinfo.website = myMapMarkerWebsite[i];
-					markerdetailinfo.description = myMapMarkerDescription[i];
-					AllTGOSMarkers.push(myFarmpTGMarker);
-					if(farmcheckbox.checked == true){
-						myFarmpTGMarker.setVisible(true);
-					}
-					else{
-						myFarmpTGMarker.setVisible(false);
-					}
-					myMapMarkersforRmv.push(myFarmpTGMarker);
-					
-					TGOS.TGEvent.addListener(myFarmpTGMarker, 'click', function(myFarmpTGMarker, markerdetailinfo){ 
+						}(citizenfarmpTGMarker,markerdetailinfo));
+						break;
+					case '螢火蟲區':
+						var fireflypTGMarker = new TGOS.TGMarker(pMap, myMapMarkers[i],myMapinfotext[i], fireflymarkerImg, {flat:false});
+						var markerdetailinfo = new Object();			//為了儲存地標位置and標題以外的資訊所創的Object
+						markerdetailinfo.address = myMapMarkerAddress[i];
+						markerdetailinfo.website = myMapMarkerWebsite[i];
+						AllTGOSMarkers.push(fireflypTGMarker);
+						if(fireflycheckbox.checked == true){
+							fireflypTGMarker.setVisible(true);
+						}
+						else{
+							fireflypTGMarker.setVisible(false);
+						}
+						
+						TGOS.TGEvent.addListener(fireflypTGMarker, 'click', function(fireflypTGMarker, markerdetailinfo){ 
 							return function () {                  
-								MarkerPressed(myFarmpTGMarker.title,markerdetailinfo);
-								TWConvert(myFarmpTGMarker.position.x,myFarmpTGMarker.position.y)
+								MarkerPressed(fireflypTGMarker.title,markerdetailinfo);						
+								TWConvert(fireflypTGMarker.position.x,fireflypTGMarker.position.y)					
+								school_name = '';
 							}
-					}(myFarmpTGMarker,markerdetailinfo));
-					break;
-				case '市民農園':
-					var citizenfarmpTGMarker = new TGOS.TGMarker(pMap, myMapMarkers[i],myMapinfotext[i], citizenfarmmarkerImg, {flat:false});
-					var markerdetailinfo = new Object();			//為了儲存地標位置and標題以外的資訊所創的Object
-					markerdetailinfo.address = myMapMarkerAddress[i];
-					AllTGOSMarkers.push(citizenfarmpTGMarker);
-					if(citizenfarmcheckbox.checked == true){
-						citizenfarmpTGMarker.setVisible(true);
-					}
-					else{
-						citizenfarmpTGMarker.setVisible(false);
-					}
-					myMapMarkersforRmv.push(citizenfarmpTGMarker);
-					TGOS.TGEvent.addListener(citizenfarmpTGMarker, 'click', function(citizenfarmpTGMarker, markerdetailinfo){ 
-						return function () {                  
-							MarkerPressed(citizenfarmpTGMarker.title,markerdetailinfo);						
-							TWConvert(citizenfarmpTGMarker.position.x,citizenfarmpTGMarker.position.y)					
-							console.log(markerdetailinfo)
+						}(fireflypTGMarker,markerdetailinfo));
+						break;
+					case '蝴蝶園':
+						var butterflypTGMarker = new TGOS.TGMarker(pMap, myMapMarkers[i],myMapinfotext[i], butterflymarkerImg, {flat:false});
+						var markerdetailinfo = new Object();			//為了儲存地標位置and標題以外的資訊所創的Object
+						markerdetailinfo.address = myMapMarkerAddress[i];
+						AllTGOSMarkers.push(butterflypTGMarker);
+						if(butterflycheckbox.checked == true){
+							butterflypTGMarker.setVisible(true);
 						}
-					}(citizenfarmpTGMarker,markerdetailinfo));
-					break;
-				case '螢火蟲區':
-					var fireflypTGMarker = new TGOS.TGMarker(pMap, myMapMarkers[i],myMapinfotext[i], fireflymarkerImg, {flat:false});
-					var markerdetailinfo = new Object();			//為了儲存地標位置and標題以外的資訊所創的Object
-					markerdetailinfo.address = myMapMarkerAddress[i];
-					markerdetailinfo.website = myMapMarkerWebsite[i];
-					AllTGOSMarkers.push(fireflypTGMarker);
-					if(fireflycheckbox.checked == true){
-						fireflypTGMarker.setVisible(true);
-					}
-					else{
-						fireflypTGMarker.setVisible(false);
-					}
-					myMapMarkersforRmv.push(fireflypTGMarker);
-					
-					TGOS.TGEvent.addListener(fireflypTGMarker, 'click', function(fireflypTGMarker, markerdetailinfo){ 
-						return function () {                  
-							MarkerPressed(fireflypTGMarker.title,markerdetailinfo);						
-							TWConvert(fireflypTGMarker.position.x,fireflypTGMarker.position.y)					
-							console.log(markerdetailinfo)
+						else{
+							butterflypTGMarker.setVisible(false);
 						}
-					}(fireflypTGMarker,markerdetailinfo));
-					break;
-				case '蝴蝶園':
-					var butterflypTGMarker = new TGOS.TGMarker(pMap, myMapMarkers[i],myMapinfotext[i], butterflymarkerImg, {flat:false});
-					var markerdetailinfo = new Object();			//為了儲存地標位置and標題以外的資訊所創的Object
-					markerdetailinfo.address = myMapMarkerAddress[i];
-					AllTGOSMarkers.push(butterflypTGMarker);
-					if(butterflycheckbox.checked == true){
-						butterflypTGMarker.setVisible(true);
-					}
-					else{
-						butterflypTGMarker.setVisible(false);
-					}
-					myMapMarkersforRmv.push(butterflypTGMarker);
-					
-					TGOS.TGEvent.addListener(butterflypTGMarker, 'click', function(butterflypTGMarker, markerdetailinfo){ 
-						return function (){                  
-							MarkerPressed(butterflypTGMarker.title,markerdetailinfo);				
-							TWConvert(butterflypTGMarker.position.x,butterflypTGMarker.position.y)							
+						
+						TGOS.TGEvent.addListener(butterflypTGMarker, 'click', function(butterflypTGMarker, markerdetailinfo){ 
+							return function (){                  
+								MarkerPressed(butterflypTGMarker.title,markerdetailinfo);				
+								TWConvert(butterflypTGMarker.position.x,butterflypTGMarker.position.y)
+								school_name = '';								
+							}
+						}(butterflypTGMarker,markerdetailinfo));
+						break;
+					case '商店':
+						var shoppTGMarker = new TGOS.TGMarker(pMap, myMapMarkers[i],myMapinfotext[i], shopmarkerImg, {flat:false});
+						var markerdetailinfo = new Object();			//為了儲存地標位置and標題以外的資訊所創的Object
+						markerdetailinfo.address = myMapMarkerAddress[i];
+						AllTGOSMarkers.push(shoppTGMarker);
+						if(shopcheckbox.checked == true){
+							shoppTGMarker.setVisible(true);
 						}
-					}(butterflypTGMarker,markerdetailinfo));
-					break;
-				case '商店':
-					var shoppTGMarker = new TGOS.TGMarker(pMap, myMapMarkers[i],myMapinfotext[i], shopmarkerImg, {flat:false});
-					var markerdetailinfo = new Object();			//為了儲存地標位置and標題以外的資訊所創的Object
-					markerdetailinfo.address = myMapMarkerAddress[i];
-					AllTGOSMarkers.push(shoppTGMarker);
-					if(shopcheckbox.checked == true){
-						shoppTGMarker.setVisible(true);
-					}
-					else{
-						shoppTGMarker.setVisible(false);
-					}
-					
-					myMapMarkersforRmv.push(shoppTGMarker);
-					TGOS.TGEvent.addListener(shoppTGMarker, 'click', function(shoppTGMarker, markerdetailinfo){ 
-						return function () {                  
-							MarkerPressed(shoppTGMarker.title,markerdetailinfo);
-							TWConvert(shoppTGMarker.position.x,shoppTGMarker.position.y)
+						else{
+							shoppTGMarker.setVisible(false);
 						}
-					}(shoppTGMarker,markerdetailinfo));	
-					break;
-				case '生態園區':
-					var ecologypTGMarker = new TGOS.TGMarker(pMap, myMapMarkers[i],myMapinfotext[i], ecologymarkerImg, {flat:false});
-					var markerdetailinfo = new Object();			//為了儲存地標位置and標題以外的資訊所創的Object
-					markerdetailinfo.address = myMapMarkerAddress[i];
-					markerdetailinfo.website = myMapMarkerWebsite[i];
-					markerdetailinfo.description = myMapMarkerDescription[i];
-					AllTGOSMarkers.push(ecologypTGMarker);
-					if(ecologycheckbox.checked == true){
-						ecologypTGMarker.setVisible(true);
-					}
-					else{
-						ecologypTGMarker.setVisible(false);
-					}
-					
-					myMapMarkersforRmv.push(ecologypTGMarker);
-					TGOS.TGEvent.addListener(ecologypTGMarker, 'click', function(ecologypTGMarker, markerdetailinfo){ 
-						return function () {                  
-							MarkerPressed(ecologypTGMarker.title,markerdetailinfo);
-							TWConvert(ecologypTGMarker.position.x,ecologypTGMarker.position.y)
+						
+						TGOS.TGEvent.addListener(shoppTGMarker, 'click', function(shoppTGMarker, markerdetailinfo){ 
+							return function () {                  
+								MarkerPressed(shoppTGMarker.title,markerdetailinfo);
+								TWConvert(shoppTGMarker.position.x,shoppTGMarker.position.y)
+								school_name = '';	
+							}
+						}(shoppTGMarker,markerdetailinfo));	
+						break;
+					case '生態園區':
+						
+						var ecologypTGMarker = new TGOS.TGMarker(pMap, myMapMarkers[i],myMapinfotext[i], ecologymarkerImg, {flat:false});
+						var markerdetailinfo = new Object();			//為了儲存地標位置and標題以外的資訊所創的Object
+						markerdetailinfo.address = myMapMarkerAddress[i];
+						markerdetailinfo.website = myMapMarkerWebsite[i];
+						markerdetailinfo.description = myMapMarkerDescription[i];
+						AllTGOSMarkers.push(ecologypTGMarker);
+						if(ecologycheckbox.checked == true){
+							ecologypTGMarker.setVisible(true);
 						}
-					}(ecologypTGMarker,markerdetailinfo));	
-					break;
+						else{
+							ecologypTGMarker.setVisible(false);
+						}
+						
+						TGOS.TGEvent.addListener(ecologypTGMarker, 'click', function(ecologypTGMarker, markerdetailinfo){ 
+							return function () {                  
+								MarkerPressed(ecologypTGMarker.title,markerdetailinfo);
+								TWConvert(ecologypTGMarker.position.x,ecologypTGMarker.position.y)
+								school_name = '';	
+							}
+						}(ecologypTGMarker,markerdetailinfo));	
+						break;
+				}
 			}
+			else{
+				switch(pData.graphics[i].properties.類型){
+					case '蔬菜介紹': 
+						var vegpTGMarker = new TGOS.TGMarker(pMap, myMapMarkers[i],myMapinfotext[i], vegmarkerImg,{flat:false});
+						var markerdetailinfo = new Object();			//為了儲存地標位置and標題以外的資訊所創的Object
+						//markerdetailinfo.address = myMapMarkerAddress[i];
+						//markerdetailinfo.website = myMapMarkerWebsite[i];
+						markerdetailinfo.description = myMapMarkerDescription[i];
+						markerdetailinfo.knowID = knowID[i];
+						AllTGOSMarkers.push(vegpTGMarker);
+						vegpTGMarker.setVisible(true);
+						
+						TGOS.TGEvent.addListener(vegpTGMarker, 'click', function(vegpTGMarker, markerdetailinfo){ 
+								return function () {                  
+									//MarkerPressed(vegpTGMarker.title,markerdetailinfo);
+									vegdetailpressed(vegpTGMarker.title,markerdetailinfo);
+									
+								}
+						}(vegpTGMarker,markerdetailinfo));
+						break;
+				}
+			}
+
 		//messageBoxS= new TGOS.TGInfoWindow(myMapinfotext[i], myMapMarkers[i], InfoWindowOptions); 
 		//console.log(myMapinfotext[i]);
 		//console.log(messageBoxS);								
@@ -325,7 +367,7 @@ function LoadGeoJson(){
 });
 	
 	//alert(pDatalength);
-	
+	LoadGeoJsonFinished = true;
 }
 			function toggleSidebar() 
 			{
@@ -342,7 +384,7 @@ function LoadGeoJson(){
 			
 			function markervisible()//改變visible觸發 ----警告----警告-----警告:快速連點會造成地圖Bug  ((((待解決))))
 			{
-			LoadGeoJson();
+				LoadGeoJson(); 
 			}
 		
 		    function MarkerPressed(markerTitle,markerdetailinfo)
@@ -358,17 +400,18 @@ function LoadGeoJson(){
 					document.getElementById("mySidebar").classList.toggle('active');
 					sidebaractivate = true;
 				}
-				
+				 
 				if(markerdetailinfo.website != undefined){
-					document.getElementById("markerwebsite").innerHTML = "網址: "+ markerdetailinfo.website;
+				document.getElementById("markerwebsite").innerHTML = "網址:  <a href=" +  markerdetailinfo.website+"  target='_blank' >" +markerdetailinfo.website+"</a>" 
 				}
-				
 				if(markerdetailinfo.description != undefined){
 					document.getElementById("markerdescription").innerHTML = "介紹: "+ markerdetailinfo.description;
 				}
+				if(markerdetailinfo.address != undefined){
+					document.getElementById("markerdetail").innerHTML = "地址: "+markerdetailinfo.address;	
+				}
 				
 				document.getElementById("markerdetailtitle").innerHTML = markerTitle;
-				document.getElementById("markerdetail").innerHTML = "地址: "+markerdetailinfo.address;	
 				document.getElementById("chck2").checked = true;
 			}
 			
@@ -392,18 +435,22 @@ function LoadGeoJson(){
 				window.open(url)
 			}
 			
-			function toggledetail(){
-					
+			function toggledetail(para){
+					document.getElementById('popupdetail').innerHTML = '';
 					if(school_name == ''){
-						alert("請點選地圖座標!");
+						alert("請點選有效的座標!");
 					}
 					else
 					
 					var popupdetail = document.getElementById('popupdetail');
-					popupdetail.classList.toggle('active');
+					
+					if(para != "dontoff"){
+						popupdetail.classList.toggle('active');
+					}
+					
 					
 					$.ajax({                                      //使用jQuery讀取學校資訊json
-						url: "http://192.192.155.112/API/Map.aspx",
+						url: "http://192.192.155.112/API/Map.aspx?school_id="+ school_ID,
 						type: "GET",
 						dataType: "json",
 						success: function(Jdata) {
@@ -419,16 +466,16 @@ function LoadGeoJson(){
 								let content = '<div class="flex">'
 									+'<h3>教師名稱 : </h3><h3>' + Jdata[i].teacher_name + '</h3>'
 								+'</div>'
-								+'<div class="img_flex">';
+								+'<div class="class_flex">';
 								for(let j=0;j<Jdata[i].record.length ; j++){
-									console.log("record["+ j +"]:"+Jdata[i].record[j].img);
-									content +=
-										'<div class="record_img">'
-												+'<img src="' + Jdata[i].record[j].img + '">'
+									//console.log("record["+ j +"]:"+	);
+									content += 
+										'<div class="">'
+												+'<a class="classbtn" onclick="clickedclassteacher(&quot;'+Jdata[i].teacher_name+'&quot;); clickedclass('+Jdata[i].record[j].class_id+');">' + Jdata[i].record[j].class_name + '</a>'
 										+'</div>';
 								}
 								
-								content += '</div>';
+								content += '</div>'; 
 								console.log(content)
 								my_body.innerHTML += content
 								/*var newItem = document.createElement("H3");
@@ -454,14 +501,24 @@ function LoadGeoJson(){
 								}*/
 
 							}
-							my_body.innerHTML +='<input type="button" class="closebutton" id="closebutton" onclick="toggledetail()" value = &#10006;>';
+							my_body.innerHTML +='<input type="button" class="closebutton" id="closebutton" onclick="closewindow()" value = &#10006;>';
 						},
   
 						error: function() {
-							alert("讀取json失敗");
+							 document.getElementById('popupdetail').innerHTML += '<div class="flex">'
+									+'<h2>此學校暫無種植資料! </h2>'
+								+'</div>';
+								
+							document.getElementById('popupdetail').innerHTML +='<input type="button" class="closebutton" id="closebutton" onclick="closewindow()" value = &#10006;>';
 						}
 					});
 					
+
+					
+			}
+			function closewindow(){
+				var popupdetail = document.getElementById('popupdetail');
+				popupdetail.classList.toggle('active');
 			}
 			
 			
@@ -542,8 +599,6 @@ function LoadGeoJson(){
 				
 				
 			} */
-			
-			
 		function searchmarker(){
 			document.getElementById("searchresult").innerHTML = "";
 			var searchstring = document.getElementById("searchTerm").value;
@@ -551,53 +606,322 @@ function LoadGeoJson(){
 			//var foundPresent = myMapinfotext.includes(searchstring);
 			const result = myMapinfotext.filter((value) => value.match(searchstring));
 			
-			
 			for(var i= 0  ; i < result.length ; i++ ){
 				var resultparameter = "'" + result[i] + "'"
 				document.getElementById("searchresult").innerHTML += '<button onclick = "searchresult('+ resultparameter +')" >'+ result[i]+'</button>' ;
-				
-			}
-			
-			
+			}	
 		}
 		
 		function searchresult(resultstring){
 			//MarkerPressed(resultstring);
-			for(var i = 0 ; i < AllTGOSMarkers.length ; i++){
-				if(AllTGOSMarkers[i].getTitle() == resultstring){
-					pMap.setCenter(AllTGOSMarkers[i].getPosition());
-					pMap.setZoom(11);
+			var isfinished = false;
+			console.log(resultstring)
+			if(LoadGeoJsonFinished == true){
+				for(var i = 0 ; i < AllTGOSMarkers.length ; i++){
+						if(AllTGOSMarkers[i].getTitle() == resultstring){
+							if(knowledgemode == false){
+								pMap.setCenter(AllTGOSMarkers[i].getPosition());
+								pMap.setZoom(11);
+								
+								TWConvert(AllTGOSMarkers[i].position.x,AllTGOSMarkers[i].position.y);
+								school_name = AllTGOSMarkers[i].title;
+								school_ID = myMapSchoolIDArr[i];
+								
+								document.getElementById("markerwebsite").innerHTML = "";
+								document.getElementById("markerdescription").innerHTML = "";
+								
+								if(sidebaractivate == true)
+								{
+									
+								}
+								else
+								{
+									document.getElementById("mySidebar").classList.toggle('active');
+									sidebaractivate = true;
+								}
+								
+								if(myMapMarkerWebsite[i] != undefined){
+									document.getElementById("markerwebsite").innerHTML = "網址:<a href=" +  myMapMarkerWebsite[i]+"  target='_blank' >" +myMapMarkerWebsite[i]+"</a>" 
+								}
+								
+								if(myMapMarkerDescription[i] != ""){
+									document.getElementById("markerdescription").innerHTML = "介紹: "+ myMapMarkerDescription[i];
+								}
+								if(myMapMarkerAddress[i] != undefined){
+									document.getElementById("markerdetail").innerHTML = "地址: "+ myMapMarkerAddress[i];	
+								}
+								document.getElementById("markerdetailtitle").innerHTML = AllTGOSMarkers[i].title; 
+								document.getElementById("chck2").checked = true;
+								isfinished = true;
+							}
+							else{
+								pMap.setCenter(AllTGOSMarkers[i].getPosition());
+								pMap.setZoom(5);
+								isfinished = true;
+							}
+						}
 					
-					TWConvert(AllTGOSMarkers[i].position.x,AllTGOSMarkers[i].position.y);
-					school_name = AllTGOSMarkers[i].title;
-					
-					document.getElementById("markerwebsite").innerHTML = "";
-					document.getElementById("markerdescription").innerHTML = "";
-					if(sidebaractivate == true)
-					{
-						
-					}
-					else
-					{
-						document.getElementById("mySidebar").classList.toggle('active');
-						sidebaractivate = true;
-					}
-					
-					if(myMapMarkerWebsite[i] != undefined){
-						document.getElementById("markerwebsite").innerHTML = "網址: "+ myMapMarkerWebsite[i];
-					}
-					
-					if(myMapMarkerDescription[i] != undefined){
-						document.getElementById("markerdescription").innerHTML = "介紹: "+ myMapMarkerDescription[i];
-					}
-					
-					document.getElementById("markerdetailtitle").innerHTML = AllTGOSMarkers[i].title;
-					document.getElementById("markerdetail").innerHTML = "地址: "+myMapMarkerAddress[i];	
-					document.getElementById("chck2").checked = true;
-					
+				}
+				if(isfinished == false){
+					knowmapview()
 				}
 			}
 			
+		}
+		
+		//--------------------------------小知識模式
+		function vegdetailpressed(markerTitle,markerdetailinfo){
+			document.getElementById("vegbutton").innerHTML = '<button onclick = "vegmoredetail()"> 查看詳細介紹 </button>' ;
+			
+				document.getElementById("markerwebsite").innerHTML = "";
+				document.getElementById("markerdescription").innerHTML = "";
+				document.getElementById("markerdetail").innerHTML = "";	
+				document.getElementById("longandlat").innerHTML = "";
+				knowledgetitle = markerdetailinfo.knowID 
+				
+				if(sidebaractivate == true)
+				{
+					
+				}
+				else
+				{
+					document.getElementById("mySidebar").classList.toggle('active');
+					sidebaractivate = true;
+				}
+				 
+				if(markerdetailinfo.description != undefined){
+					document.getElementById("markerdescription").innerHTML = "說明: "+ markerdetailinfo.description;
+				}
+				
+				document.getElementById("markerdetailtitle").innerHTML = markerTitle;
+				document.getElementById("chck2").checked = true;
+		}
+		
+		function vegmoredetail(){
+			console.log(knowledgetitle)
+			
+
+			var title = '';
+			var des = '';
+			var cabimgurl = '';
+			
+			if (knowledgetitle == 'HighCab'){
+				title = '高山高麗菜';
+				des ='日夜溫差大，植物白天行光合作用，所產生的碳水化合物在夜晚低溫時更容易累積，高麗菜在養分充足下，更甜、更好吃。簡單說，植物的光合作用分兩部分，一是光反應，吸收光能轉換成植物可以使用的能量，並且分解水產生氧氣，二是碳(暗)反應, 植物利用光反應產生的能量固定二氧化碳，並且轉換成葡萄糖。 在溫差大的地區，因為晚上很冷，植物為了避免凍傷就會合成比較多的葡萄糖以增加溶質濃度，甚至若干澱粉也會轉換成葡萄糖，使得植物細胞的溶質變多；另一方面，晚上的低溫使得呼吸作用相對消耗較少的糖分，如此反反覆覆的日夜進行，就使得植物本身所含的糖分變高，自然就比較甜了。'
+				cabimgurl = 'http://192.192.155.112/TGOSMap/HighCab.png'
+			}
+			else if (knowledgetitle == 'LowCab'){
+				title = '平地高麗菜';
+				des = '平地高麗菜因氣溫較高,而高麗菜的生長環境是10-20度,所以夏天要吃高山高麗菜,而冬天最好選擇平地高麗菜,因為高麗菜其實太低溫也不好,冬天平地大約是12-18度,合高麗菜生長環境,所以因季節變化就要選擇不同的高麗菜。'
+				cabimgurl = 'http://192.192.155.112/TGOSMap/LowCab.png'
+			}
+			
+			var popupdetail = document.getElementById('popupdetail');
+			popupdetail.classList.toggle('active');
+			var my_body = document.getElementById('popupdetail');
+			my_body.innerHTML = '<h1 id = "detailtitle"> '+ title+'</h1>';
+			my_body.innerHTML += '<img src = "'+ cabimgurl +'" class = "cabimg" >'
+			my_body.innerHTML += '<div class = "des"> '+ des +'</div>';
+			my_body.innerHTML +='<input type="button" class="closebutton" id="closebutton" onclick="vegmoredetail()" value = &#10006;>';
+		}
+		//------------------------------------------
+		function knowmapview(resultstring){   //切換地圖模式
+			if(pData != null){
+				pData.clearAll();
+				for (var count=0; count < AllTGOSMarkers.length; count++) {
+					AllTGOSMarkers[count].setMap(null);
+				}		
+				AllTGOSMarkers = [];
+			}
+			if(knowledgemode == false){
+				knowledgemode = true;
+				document.getElementById("markerdetailtitle").innerHTML = "請選擇地圖知識點！";
+				document.getElementById("currentmode").innerHTML = "目前為:小知識地圖模式";
+				document.getElementById("currentmodeimg").innerHTML = '<img src="knowmode.png" style="width:100px;height:100px;">' ;
+				document.getElementById("vegbutton").innerHTML = '<button onclick = "vegmoredetail()"> 查看詳細介紹 </button>' 
+				document.getElementById("normalbutton").innerHTML = '';
+				pMap.setZoom(3);
+				pMap.setCenter(knowstartPoint);
+			}
+			else{
+				knowledgemode = false;
+				document.getElementById("markerdetailtitle").innerHTML = "請選擇地圖座標！";
+				document.getElementById("vegbutton").innerHTML = '' ;
+				document.getElementById("markerwebsite").innerHTML = '' ;
+				document.getElementById("longandlat").innerHTML = '' ;
+				document.getElementById("normalbutton").innerHTML = '<input type="button" value="查看Google街景" id="streetviewbutton" onclick="openstreetview()"><input type="button" value="查看種植/飼養紀錄" id="detailbutton" onclick="toggledetail()">';
+				document.getElementById("currentmode").innerHTML = "目前為:座標地圖模式";
+				document.getElementById("currentmodeimg").innerHTML = '<img src="normalmode.png" style="width:100px;height:100px;">' ;
+				pMap.setZoom(7);	
+				pMap.setCenter(startPoint); 
+			}
+			LoadGeoJson();
+			
+		}
+		function clickedclassteacher(teacher_name){   //因為html中文傳值問題所以才要多做一個function
+			teachersname = teacher_name;
+		}
+		function clickedclass(class_id){
+			
+			class_ID = class_id;
+			var my_body = document.getElementById('popupdetail');
+			//document.getElementById("detailtitle").innerHTML += "> TEACHER_NAME";
+			my_body.innerHTML = '';
+						$.ajax({                                      
+						url: "http://192.192.155.112/API/Class.aspx?Class_ID="+class_id,
+						type: "GET",
+						dataType: "json",
+						success: function(Jdata) {
+							
+							console.log("classid:"+class_id)
+							
+							  
+							
+							var list = document.getElementById("detail");
+							/*while (list.hasChildNodes()) {
+							list.removeChild(list.firstChild);
+							}*/
+							var my_body = document.getElementById('popupdetail');
+							my_body.innerHTML = '<h1 id = "detailtitle">' + school_name +'>'+ teachersname +' 老師</h1>';
+							my_body.innerHTML += '<div id = "gallery" class="gallery"></div>';
+							
+							for(var i = 0 ; i < Jdata.length ; i++){
+								
+								let content ='</div>'
+								//+'<div class="img_flex">'
+								//+'<img width ="120px" height = "100px" src = "http://192.192.155.112/img/1.jpg">';
+								+'<div class="gallery-item">'
+								+'<div class="content"><img src="'+ Jdata[i].Photo+'" alt="" onclick = "galleryclick('+  Jdata[i].obj_ID +')"></div>'
+								+'</div>'
+								
+								
+								//content += '</div>';
+								
+								document.getElementById("gallery").innerHTML += content
+
+							}
+							my_body.innerHTML +='<input type="button" class="closebutton" id="closebutton" onclick="closewindow()" value = &#10006;>';
+							my_body.innerHTML +='<img src = "http://192.192.155.112/TGOSMap/retune.png" class="backbutton" id="backbutton" onclick="toggledetail('+ dontoff +')">';
+							
+							galleryprocess();
+						},
+  
+						error: function() {
+							console.log("NoClass")
+							alert("暫時沒有資料!");
+						}
+					});
+		}
+		
+		function galleryprocess(){
+			var gallery = document.querySelector('#gallery');
+			var getVal = function (elem, style) { return parseInt(window.getComputedStyle(elem).getPropertyValue(style)); };
+			var getHeight = function (item) { return item.querySelector('.content').getBoundingClientRect().height; };
+			var resizeAll = function () {
+				var altura = getVal(gallery, 'grid-auto-rows');
+				var gap = getVal(gallery, 'grid-row-gap');
+				gallery.querySelectorAll('.gallery-item').forEach(function (item) {
+					var el = item;
+					el.style.gridRowEnd = "span " + Math.ceil((getHeight(item) + gap) / (altura + gap));
+				});
+			};
+			gallery.querySelectorAll('img').forEach(function (item) {
+				//item.classList.add('byebye');
+				console.log("1+7  :  "+item.complete);
+					
+				
+					item.addEventListener('load', function () {
+						var altura = getVal(gallery, 'grid-auto-rows');
+						var gap = getVal(gallery, 'grid-row-gap');
+						var gitem = item.parentElement.parentElement;
+						gitem.style.gridRowEnd = "span " + Math.ceil((getHeight(gitem) + gap) / (altura + gap));
+						//item.classList.remove('byebye');  
+					});
+				
+			});
+			window.addEventListener('resize', resizeAll);
+			gallery.querySelectorAll('.gallery-item').forEach(function (item) {
+				item.addEventListener('click', function () {        
+					//item.classList.toggle('full');        
+				});
+			}); 
+		}
+		
+		function galleryclick(objID){
+			document.getElementById("gallery").innerHTML = '';
+			//alert(objID)
+			var my_body = document.getElementById('popupdetail');
+			//document.getElementById("detailtitle").innerHTML += "> TEACHER_NAME";
+			my_body.innerHTML = '';
+			
+						$.ajax({                                      
+						url: "http://192.192.155.112/API/Map_rcd.aspx?obj_ID="+objID,
+						type: "GET",
+						dataType: "json",
+						success: function(Jdata) {
+							console.log(Jdata)
+							
+							var list = document.getElementById("detail");
+							/*while (list.hasChildNodes()) {
+							list.removeChild(list.firstChild);
+							}*/
+							var my_body = document.getElementById('popupdetail');
+							my_body.innerHTML = '<h1 id = "detailtitle">' + school_name +'>'+ teachersname +' 老師</h1>';
+							my_body.innerHTML += '<div id = "rcd" class="rcd"></div>';
+							
+							for(var i = 0 ; i < Jdata.length ; i++){
+								let weatherimg = ""
+								if(Jdata[i].Weather < 3){
+									weatherimg = '<img src = "http://192.192.155.112/TGOSMap/Weather_sunny.png" class="weatherimg">'
+								}
+								else if(Jdata[i].Weather >= 3 && Jdata[i].Weather <= 5){
+									weatherimg = '<img src = "http://192.192.155.112/TGOSMap/Weather_suncloud.png" class="weatherimg">'
+								}
+								else if(Jdata[i].Weather >= 6 && Jdata[i].Weather <= 7){
+									weatherimg = '<img src = "http://192.192.155.112/TGOSMap/Weather_cloudy.png" class="weatherimg">'
+								}
+								else if(Jdata[i].Weather >= 8){
+									weatherimg = '<img src = "http://192.192.155.112/TGOSMap/Weather_rain.png" class="weatherimg">'
+								}
+								
+								let gallerycount = "gallery" + i;
+								let content ='</div>'
+								+'<div class = "rcdcard" id ="rcdcard">'
+								+'<div class = "cardflex">'
+								+'<div class = "textpart">'
+								+'<div> 時間:'
+								+ Jdata[i].Date
+								+'</div>'
+								+'<div> 感想:'
+								+ Jdata[i].Feeling
+								+'</div>'
+								+'<div> 天氣:'
+								+ weatherimg
+								+'</div>'
+								+'</div>'
+								+'<div class = "gallerypart">'
+								+'<div id = "'+ gallerycount +'" class="stugallery"></div>'
+								+'</div>'
+								+'</div>'
+								+'</div>'					
+								
+								//content += '</div>';
+								console.log(content)
+								document.getElementById("rcd").innerHTML += content
+								
+								for(var count = 0 ; count <= Jdata[i].Img.length ; count++){
+									let images ='<img src="'+ Jdata[i].Img[count]+'" alt="" class = "stuimg" >'
+									document.getElementById(gallerycount).innerHTML += images
+								}
+							}
+
+							my_body.innerHTML +='<input type="button" class="closebutton" id="closebutton" onclick="closewindow()" value = &#10006;>';
+							my_body.innerHTML +='<img src = "http://192.192.155.112/TGOSMap/retune.png" class="backbutton" id="backbutton" onclick="clickedclass('+ class_ID+')">';
+						},
+						error: function() {
+							alert("讀取json失敗");
+						}
+					});
 		}
 		
 

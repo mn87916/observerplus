@@ -50,6 +50,11 @@ export default class App extends React.Component{
     // 如果你想要原封不動的接到 response 的資料，可以用 response.text()
     .then((response) => response.json() )
     .then((responseData) => { 
+      if(responseData.length == 0) {
+       alert("尚未有任何種植紀錄")
+       this.props.navigation.navigate("Menu2")
+      }
+      else{
       for(var i =0;i<responseData.length;i++){
          this.state.datesplit.push(responseData[i].Date.split("/"))
          this.forceUpdate()
@@ -72,6 +77,7 @@ export default class App extends React.Component{
       //console.log(this.state.data)
       this.forceUpdate()
       this.setState({isLoading:false})
+      }
     })
     .catch((error) => {
       console.warn(error);
